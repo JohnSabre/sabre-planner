@@ -1,0 +1,1809 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sabbel WFM Spray Oil Weekly Planner</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Segoe UI', Calibri, Arial, sans-serif; background: #f0f4f8; min-height: 100vh; }
+.header { background: #1565C0; color: #fff; padding: 14px 20px; }
+.header.emergency { background: #991b1b; }
+.header h1 { font-size: 16px; font-weight: 700; }
+.header p  { font-size: 12px; opacity: 0.8; margin-top: 3px; }
+.tabs { display: flex; background: #1251a3; padding: 0 12px; gap: 2px; }
+.tab  { padding: 8px 16px; font-size: 12px; font-weight: 600; color: rgba(255,255,255,0.7); cursor: pointer; border-bottom: 3px solid transparent; }
+.tab:hover { color: #fff; }
+.tab.active { color: #fff; border-bottom-color: #fff; }
+.card { background: #fff; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,.1); margin: 12px; padding: 16px 18px; }
+.card.run1 { border-left: 4px solid #1565C0; }
+.card.green-banner { background: #f0fdf4; border: 1px solid #86efac; padding: 12px 18px; }
+.sec { font-size: 13px; font-weight: 700; color: #1565C0; border-bottom: 2px solid #dbeafe; padding-bottom: 6px; margin-bottom: 12px; }
+.sec.red { color: #991b1b; border-color: #fca5a5; }
+.sec.amber { color: #92400e; border-color: #fcd34d; }
+label { font-size: 12px; font-weight: 700; color: #374151; display: block; margin-bottom: 4px; }
+input[type=text], input[type=number], input[type=file] { border: 1px solid #d1d5db; border-radius: 6px; padding: 7px 10px; font-size: 13px; width: 100%; }
+textarea { border: 1px solid #d1d5db; border-radius: 6px; padding: 7px 10px; font-size: 13px; width: 100%; resize: vertical; }
+select { border: 1px solid #d1d5db; border-radius: 6px; padding: 7px 10px; font-size: 13px; background: #fff; cursor: pointer; }
+.btn      { background: #1565C0; color: #fff; border: none; border-radius: 6px; padding: 9px 18px; font-size: 13px; font-weight: 700; cursor: pointer; }
+.btn:hover { background: #1251a3; }
+.btn-green { background: #166534; color: #fff; border: none; border-radius: 6px; padding: 9px 18px; font-size: 13px; font-weight: 700; cursor: pointer; }
+.btn-demo  { background: #6d28d9; color: #fff; border: none; border-radius: 6px; padding: 9px 18px; font-size: 13px; font-weight: 700; cursor: pointer; }
+.btn-sm    { background: #f3f4f6; color: #374151; border: 1px solid #d1d5db; border-radius: 5px; padding: 5px 12px; font-size: 12px; cursor: pointer; }
+.btn-sm:hover { background: #e5e7eb; }
+.btn-red   { background: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; border-radius: 5px; padding: 5px 12px; font-size: 12px; cursor: pointer; }
+.drop-zone { border: 2px dashed #93c5fd; border-radius: 8px; padding: 20px; text-align: center; background: #eff6ff; cursor: pointer; transition: all 0.15s; }
+.drop-zone:hover, .drop-zone.dragover { border-color: #1565C0; background: #dbeafe; }
+.drop-zone .dz-icon { font-size: 28px; margin-bottom: 6px; }
+.drop-zone .dz-label { font-size: 13px; font-weight: 600; color: #1565C0; }
+.drop-zone .dz-sub { font-size: 11px; color: #6b7280; margin-top: 3px; }
+table { width: 100%; border-collapse: collapse; font-size: 12px; }
+th { background: #dbeafe; color: #1565C0; font-weight: 700; padding: 7px 10px; text-align: left; border-bottom: 2px solid #93c5fd; white-space: nowrap; }
+th.r { text-align: right; } th.c { text-align: center; }
+td { padding: 7px 10px; border-bottom: 1px solid #f3f4f6; font-size: 12px; }
+td.r { text-align: right; } td.c { text-align: center; }
+tr:nth-child(even) td { background: #f9fafb; }
+tr.total td { background: #f0f4ff !important; font-weight: 700; }
+tfoot td { background: #dbeafe !important; font-weight: 700; }
+.pill { border-radius: 12px; padding: 2px 10px; font-size: 11px; font-weight: 700; display: inline-block; margin-right: 4px; }
+.alert  { background: #fef3c7; border: 1px solid #f59e0b; border-radius: 6px; padding: 10px 14px; font-size: 12px; color: #92400e; margin-bottom: 10px; }
+.danger { background: #fee2e2; border: 1px solid #ef4444; border-radius: 6px; padding: 10px 14px; font-size: 12px; color: #991b1b; margin-bottom: 10px; }
+.good   { background: #f0fdf4; border: 1px solid #86efac; border-radius: 6px; padding: 10px 14px; font-size: 12px; color: #166534; margin-bottom: 10px; }
+.info   { background: #eff6ff; border: 1px solid #93c5fd; border-radius: 6px; padding: 10px 14px; font-size: 12px; color: #1e40af; margin-bottom: 10px; }
+.stats  { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 14px; }
+.stat   { border-radius: 8px; padding: 12px 16px; text-align: center; flex: 1; min-width: 80px; }
+.stat .num { font-size: 22px; font-weight: 700; }
+.stat .lbl { font-size: 10px; color: #6b7280; margin-top: 2px; }
+.woh-grid { display: flex; flex-wrap: wrap; gap: 8px; }
+.woh-tile { flex: 1 1 100px; border-radius: 8px; padding: 10px 12px; min-width: 90px; border: 1px solid; }
+.woh-tile .short { font-size: 10px; color: #6b7280; margin-bottom: 4px; }
+.woh-tile .woh   { font-size: 16px; font-weight: 700; }
+.woh-tile .units { font-size: 10px; color: #9ca3af; margin-top: 2px; }
+.run-header { display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+.email-box { margin-top: 14px; border: 1px solid #e5e7eb; border-radius: 8px; padding: 14px; background: #f8f9fa; }
+.email-box pre { font-size: 11px; white-space: pre-wrap; line-height: 1.7; color: #374151; max-height: 400px; overflow: auto; }
+.hint { font-size: 11px; color: #9ca3af; margin-top: 3px; }
+.footer-nav { display: flex; justify-content: center; gap: 10px; margin-top: 8px; padding-bottom: 20px; }
+.demo-badge { background: rgba(109,40,217,0.15); color: #6d28d9; border-radius: 12px; padding: 2px 10px; font-size: 11px; font-weight: 700; display: inline-block; margin-left: 8px; vertical-align: middle; }
+.po-row-new      { background: #f0fdf4 !important; }
+.po-row-updated  { background: #fff7ed !important; }
+.po-row-closed   { background: #fee2e2 !important; opacity: 0.7; }
+.po-row-unchanged{ background: #fff !important; }
+.flag-card { border-radius: 8px; padding: 14px 16px; margin-bottom: 12px; border: 1px solid; }
+.flag-card.trend-up   { background: #fff7ed; border-color: #fb923c; }
+.flag-card.trend-down { background: #eff6ff; border-color: #60a5fa; }
+.flag-card.po-alert   { background: #fef3c7; border-color: #f59e0b; }
+.flag-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; flex-wrap: wrap; gap: 8px; }
+.flag-title  { font-size: 13px; font-weight: 700; }
+.flag-body   { font-size: 12px; line-height: 1.6; color: #374151; margin-bottom: 10px; }
+.trend-bar   { display: flex; gap: 4px; align-items: flex-end; margin: 8px 0; }
+.trend-week  { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+.trend-bar-fill { width: 28px; border-radius: 3px 3px 0 0; min-height: 4px; }
+.trend-label { font-size: 9px; color: #6b7280; }
+.trend-pct   { font-size: 10px; font-weight: 700; }
+.resolve-row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-top: 8px; }
+.resolve-row label { margin: 0; font-size: 12px; font-weight: 600; color: #374151; }
+.history-entry { border: 1px solid #e5e7eb; border-radius: 8px; margin-bottom: 12px; overflow: hidden; }
+.history-entry-header { display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; background: #f9fafb; cursor: pointer; }
+.history-entry-body { padding: 14px 16px; border-top: 1px solid #e5e7eb; display: none; }
+.history-entry-body.open { display: block; }
+.history-woh { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+.history-woh-chip { border-radius: 6px; padding: 3px 8px; font-size: 11px; font-weight: 600; border: 1px solid; }
+.history-run-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 6px; padding: 8px 10px; background: #f0f4ff; border-radius: 6px; font-size: 12px; }
+.empty-history { text-align: center; padding: 40px 20px; color: #9ca3af; font-size: 13px; }
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+// ════════════════════════════════════════════
+// CONSTANTS — MOQ = 60 pals / 2 FTL × 30 each
+// ════════════════════════════════════════════
+const UNITS_PAL  = { 5: 2160, 10: 1500 };
+const PAL_TOTE   = { 5: 4, 10: 3 };
+const UNITS_TOTE = { 5: 8640, 10: 4500 };
+const WKS_PER_MO = [4,4,5,4,4,4,4,5,4,4,5,5];
+const MO_NAMES   = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const CURRENT_AW = 27;
+const PALS_PER_TRUCK = 30;   // FTL = 30 pallets
+const STANDARD_MOQ   = 60;   // 2 trucks × 30
+const MOQ_FLEX_LOW   = 57;   // acceptable flex range low
+const MOQ_FLEX_HIGH  = 63;   // acceptable flex range high
+const STORAGE_KEY    = 'sabbel_session_log_v4';
+const DEMAND_KEY     = 'sabbel_demand_overrides_v4';
+const PO_KEY         = 'sabbel_po_register';
+
+const SKUS = [
+  { id:'av5',   name:'Avocado Oil Spray 5oz',  short:'Av5oz',  fill:5,  type:'fast',
+    demand:[19283,17762,18966,18219,17548,14687,16802,17413,18759,12955,14131,14323] },
+  { id:'ev5',   name:'EVOO Spray OG 5oz',       short:'EV5oz',  fill:5,  type:'fast',
+    demand:[14786,12656,14751,14211,15029,15789,16299,16394,17578,10104,14692,8914] },
+  { id:'av10',  name:'Avocado Value 10oz',       short:'Av10oz', fill:10, type:'fast',
+    demand:[11767,11101,11629,11329,11000,10098,11740,11633,11249,11331,10724,9411] },
+  { id:'ev10',  name:'EVOO Value 10oz',          short:'EV10oz', fill:10, type:'fast',
+    demand:[10271,7526,7064,9720,10374,7162,8880,9031,9117,9027,8527,9682] },
+  { id:'cook',  name:'Cooking Spray OG 5oz',     short:'Cook5',  fill:5,  type:'slowmover',
+    shipPals:7, holdPals:1,                        // §7b: ship 7p, hold 1p on 2T run
+    demand:[6690,6059,4431,2592,3844,4949,5352,6068,6897,6490,7798,6832] },
+  { id:'canal', name:'Canola Spray OG 5oz',      short:'Canal5', fill:5,  type:'slowmover',
+    shipPals:7, holdPals:1,                        // §7b: ship 7p, hold 1p on 2T run
+    demand:[6355,5049,5500,6029,6070,4857,4882,5185,5968,5554,6416,6299] },
+  { id:'bake',  name:'Baking Spray OG 5oz',      short:'Bake5',  fill:5,  type:'baking',
+    shipPals:5, holdPals:3,                        // §7c: ship 5p, hold 3p on 2T run
+    demand:[4489,3853,3670,4049,4251,2800,2903,3346,4435,4531,6514,6255] },
+];
+
+// ── DEMAND WITH OVERRIDES ──
+function getSkuDemand(id){try{const o=JSON.parse(localStorage.getItem(DEMAND_KEY)||'{}');if(o[id])return o[id];}catch(e){}return SKUS.find(s=>s.id===id).demand;}
+function saveSkuDemand(id,arr){try{const o=JSON.parse(localStorage.getItem(DEMAND_KEY)||'{}');o[id]=arr;localStorage.setItem(DEMAND_KEY,JSON.stringify(o));}catch(e){}}
+
+const week_to_mo=(()=>{const m={};let w=1;for(let mo=0;mo<12;mo++)for(let i=0;i<WKS_PER_MO[mo];i++)m[w++]=mo;return m;})();
+function resolveAw(aw){const yr=aw<=52?2026:2027;const cal=Math.max(1,Math.min(52,aw<=52?aw:aw-52));return{yr,cal,mo:week_to_mo[cal]||0};}
+function wklyDemand(sku,aw){const{mo}=resolveAw(aw);const d=getSkuDemand(sku.id);return d[mo]/WKS_PER_MO[mo];}
+function demandBetween(sku,from,to){let t=0;for(let w=from;w<to;w++)t+=wklyDemand(sku,w);return t;}
+
+// ── TREND ANALYSIS — with OOS pattern detection ──
+function checkLongTermDrift(histBaseline){
+  const flags=[];
+  if(!histBaseline)return flags;
+  for(const sku of SKUS){
+    const b=histBaseline[sku.id];
+    if(!b||!b.ytd2026||!b.ytd2025same)continue;
+    // Launch SKUs have less history — require stronger signal before flagging
+    const threshold=b.use2025only?0.25:0.15;
+    let totalDiff=0,totalBase=0,monthsCompared=0;
+    for(let mi=0;mi<b.ytd2026.length;mi++){
+      const v26=b.ytd2026[mi],v25=b.ytd2025same[mi];
+      // Minimum 500 units/month to filter out near-zero launch months
+      if(v25>500&&v26>0){totalDiff+=(v26-v25);totalBase+=v25;monthsCompared++;}
+    }
+    if(monthsCompared<2)continue;
+    const pct=totalDiff/totalBase;
+    if(Math.abs(pct)>=threshold){
+      flags.push({skuId:sku.id,skuName:sku.name,skuShort:sku.short,
+        dir:pct>0?'up':'down',avgPct:pct,monthsCompared,
+        ytd2026:b.ytd2026.slice(0,monthsCompared),
+        ytd2025:b.ytd2025same.slice(0,monthsCompared),
+        weeks:[],isDrift:true});
+    }
+  }
+  return flags;
+}
+function detectOosPattern(wf){
+  // OOS signature: accelerating decline over 3+ weeks (each week worse than last)
+  // vs promotion/shift which is typically a step change
+  if(wf.length<3)return false;
+  const recent=wf.slice(-3);
+  const declining=recent.every((w,i)=>i===0||w.pct<recent[i-1].pct);
+  const accelerating=declining&&(recent[recent.length-1].pct<recent[0].pct*1.5);
+  const allSignificantlyDown=recent.every(w=>w.pct<=-0.20);
+  return accelerating&&allSignificantlyDown;
+}
+
+function analyzeTrends(scanHistory, histBaseline){
+  const flags=[];const THRESH=0.15;
+  for(const sku of SKUS){
+    const weeks=(scanHistory[sku.id]||[]).slice(-6); // last 6 weeks
+    if(weeks.length<2)continue;
+    // Annual average weekly rate — stable baseline that doesn't amplify seasonal noise
+    let annAvgWkly;
+    if(histBaseline&&histBaseline[sku.id]){
+      const annTotal=Array.from({length:12},(_,mo)=>(histBaseline[sku.id][mo]||0)*WKS_PER_MO[mo]).reduce((a,b)=>a+b,0);
+      annAvgWkly=annTotal>0?annTotal/52:wklyDemand(sku,CURRENT_AW);
+    } else {
+      annAvgWkly=getSkuDemand(sku.id).reduce((a,b)=>a+b,0)/52;
+    }
+    const wf=weeks.map(w=>({...w,baseline:Math.round(annAvgWkly),pct:annAvgWkly>0?(w.units-annAvgWkly)/annAvgWkly:0}));
+    let ru=0,rd=0,uw=[],dw=[];
+    for(const f of wf){
+      if(f.pct>=THRESH){ru++;rd=0;dw=[];uw.push(f);}
+      else if(f.pct<=-THRESH){rd++;ru=0;uw=[];dw.push(f);}
+      else{ru=0;rd=0;uw=[];dw=[];}
+      if(ru>=2&&!flags.find(x=>x.skuId===sku.id&&x.dir==='up')){
+        const ap=uw.reduce((t,w)=>t+w.pct,0)/uw.length;
+        flags.push({skuId:sku.id,skuName:sku.name,skuShort:sku.short,dir:'up',weeks:[...uw],avgPct:ap,oosLikely:false,resolved:false,resolution:''});
+      }
+      if(rd>=2&&!flags.find(x=>x.skuId===sku.id&&x.dir==='down')){
+        const ap=dw.reduce((t,w)=>t+w.pct,0)/dw.length;
+        const oosLikely=detectOosPattern(dw);
+        flags.push({skuId:sku.id,skuName:sku.name,skuShort:sku.short,dir:'down',weeks:[...dw],avgPct:ap,oosLikely,resolved:false,resolution:''});
+      }
+    }
+  }
+  return flags;
+}
+
+// ── PO FILE PARSER ──
+// Tries to read whatever the OMS exports — flexible column matching
+function parsePOFile(allRows, firstRowHdrs) {
+  // OMS export: blank col 0, header block rows 0-12, data from row 13
+  // Safe cell converter — handles null, undefined, NaN
+  const safe=c=>(c==null||c===undefined||String(c)==='NaN'||String(c)==='undefined')?'':String(c).trim();
+
+  // Find the actual header row
+  let headerRowIdx=0;
+  for(let i=0;i<Math.min(allRows.length,25);i++){
+    const r=allRows[i];
+    if(!r)continue;
+    const joined=r.map(safe).join('|').toUpperCase();
+    if(joined.includes('PO NUMBER')||joined.includes('PRODUCT NAME')){headerRowIdx=i;break;}
+  }
+
+  // Map header row — every cell becomes a safe string
+  const hdrs=(allRows[headerRowIdx]||[]).map(safe);
+
+  // Find columns — skip empty header cells
+  const find=(...terms)=>hdrs.findIndex(h=>h&&terms.some(t=>h.toUpperCase().includes(t.toUpperCase())));
+  const poIdx  =find('PO NUMBER','PO#','PO NUM','ORDER#');
+  const nameIdx=find('PRODUCT NAME','ITEM NAME');
+  const qtyIdx =find('QUANTITY','QTY','UNITS');
+  const dateIdx=find('DUE DATE','SHIP DATE','DELIVERY DATE','CURRENT PO');
+
+  // Fallback to known OMS column positions
+  const poCol  =poIdx>=0  ?poIdx  :1;
+  const nameCol=nameIdx>=0?nameIdx:2;
+  const qtyCol =qtyIdx>=0 ?qtyIdx :5;
+  const dateCol=dateIdx>=0?dateIdx:6;
+
+  const poMap={};let lastPoNum='';
+
+  for(let i=headerRowIdx+1;i<allRows.length;i++){
+    const row=allRows[i];
+    if(!row||!Array.isArray(row))continue;
+    if(row.every(c=>c==null||c===undefined||c===''))continue;
+
+    // PO number — carry forward when blank
+    const rawPo=safe(row[poCol]);
+    const poNum=rawPo||lastPoNum;
+    if(!poNum)continue;
+    lastPoNum=poNum;
+
+    const productName=safe(row[nameCol]);
+    const rawQty=row[qtyCol];
+    const qty=(rawQty!=null&&!isNaN(Number(rawQty)))?Number(rawQty):0;
+
+    // Due date → week number
+    let weekNum=null;
+    const rawDate=row[dateCol];
+    if(rawDate!=null&&safe(rawDate)){
+      let d;
+      if(typeof rawDate==='number'){d=new Date(Math.round((rawDate-25569)*86400*1000));}
+      else{d=new Date(rawDate);}
+      if(!isNaN(d.getTime())){
+        weekNum=Math.ceil(((d-new Date(d.getFullYear(),0,1))/(7*24*3600*1000))+1);
+      }
+    }
+
+    if(!poMap[poNum])poMap[poNum]={poNum,weekNum,status:'OPEN',skuUnits:{},skuPals:{},lines:[],notes:''};
+    if(weekNum&&!poMap[poNum].weekNum)poMap[poNum].weekNum=weekNum;
+    if(!productName)continue;
+
+    const skuId=matchSku(productName);
+    if(skuId&&qty>0){
+      const packSz={av5:12,ev5:12,av10:6,ev10:6,cook:6,canal:12,bake:6}[skuId]||12;
+      const unitQty=qty*packSz; // cases × pack size = units
+      poMap[poNum].skuUnits[skuId]=(poMap[poNum].skuUnits[skuId]||0)+unitQty;
+      const sku=SKUS.find(s=>s.id===skuId);
+      poMap[poNum].skuPals[skuId]=Math.floor((poMap[poNum].skuUnits[skuId]||0)/UNITS_PAL[sku.fill]);
+      poMap[poNum].lines.push({product:productName,skuId,cases:qty,units:unitQty,packSz});
+    } else if(qty>0){
+      poMap[poNum].lines.push({product:productName,skuId:null,qty});
+    }
+  }
+
+  return Object.values(poMap).map(po=>{
+    const totalUnits=Object.values(po.skuUnits).reduce((t,v)=>t+v,0);
+    const totalPals=Object.values(po.skuPals).reduce((t,v)=>t+v,0);
+    return{...po,pals:totalPals,totalUnits,unmatchedLines:po.lines.filter(l=>!l.skuId)};
+  });
+}
+
+// Reconcile new PO file against stored PO register
+function reconcilePOs(newPOs) {
+  let stored = [];
+  try { stored = JSON.parse(localStorage.getItem(PO_KEY)||'[]'); } catch(e){}
+
+  const result = [];
+  // Match by PO number
+  for (const np of newPOs) {
+    const existing = stored.find(s => s.poNum === np.poNum);
+    if (!existing) {
+      result.push({ ...np, changeType: 'new', prev: null });
+    } else {
+      const palChanged = Math.abs((np.pals||0) - (existing.pals||0)) > 0;
+      const weekChanged = np.weekNum !== existing.weekNum;
+      const statusChanged = np.status !== existing.status;
+      const changed = palChanged || weekChanged || statusChanged;
+      result.push({ ...np, changeType: changed ? 'updated' : 'unchanged', prev: existing });
+    }
+  }
+  // POs in stored but not in new file → possibly closed/delivered
+  for (const sp of stored) {
+    if (!newPOs.find(np => np.poNum === sp.poNum)) {
+      result.push({ ...sp, changeType: 'closed', prev: sp });
+    }
+  }
+  return result;
+}
+
+function savePORegister(pos) {
+  try { localStorage.setItem(PO_KEY, JSON.stringify(pos)); } catch(e) {}
+}
+function loadPORegister() {
+  try { return JSON.parse(localStorage.getItem(PO_KEY)||'[]'); } catch(e) { return []; }
+}
+
+// ── CORE PLANNING MATH (60-pal MOQ) ──
+function calcRun(sku,unfiQoh,sfCarryIn,runAw,nextRunAw,cyclePos){
+  const f=sku.fill,ut=UNITS_TOTE[f],up=UNITS_PAL[f];
+  const wk=wklyDemand(sku,runAw),consumed=demandBetween(sku,runAw,nextRunAw);
+  const wkNext=wklyDemand(sku,nextRunAw);
+  let produced=0,shipped=0,sfStrategicHold=0;
+
+  const TARGET_LOW=10,TARGET_HIGH=11,TROUGH_FLOOR=3,OVERSTOCK_CAP=12;
+
+  // ── CORE LOGIC (all SKU types) ──
+  // Step 1: How many pallets does UNFI need to reach target peak?
+  //         sfCarryIn ships FIRST — reduces new production needed
+  // Step 2: New production = ceil((pallets needed - sfCarryIn) / tote size) × tote
+  //         Must always be whole totes
+  // Step 3: Total available = sfCarryIn + produced
+  // Step 4: Ship = what's needed for target; hold remainder at SF
+
+  function computeRun(targetPeakWks, maxShipPals){
+    // Pallets needed to hit target peak, net of what UNFI already has
+    const targetUnits=targetPeakWks*wk;
+    let shipP=Math.max(0,Math.floor((targetUnits-unfiQoh)/up));
+    if(maxShipPals>0)shipP=Math.min(shipP,maxShipPals);
+    // Trough guard
+    const projTrough=(unfiQoh+shipP*up-consumed)/Math.max(0.01,wkNext);
+    if(projTrough<TROUGH_FLOOR)shipP=maxShipPals>0?Math.min(maxShipPals+2,shipP+1):shipP+1;
+    // Overstock cap
+    let projAfter=(unfiQoh+shipP*up)/Math.max(0.01,wk);
+    while(projAfter>OVERSTOCK_CAP&&shipP>0){shipP--;projAfter=(unfiQoh+shipP*up)/Math.max(0.01,wk);}
+    const shipUnits=shipP*up;
+    // New production needed = shipment - sfCarryIn (carry-in ships first)
+    const newProdNeeded=Math.max(0,shipUnits-sfCarryIn);
+    // Round up to whole totes — must always produce complete totes
+    const totes=newProdNeeded>0?Math.ceil(newProdNeeded/ut):0;
+    const newProduced=totes*ut;
+    // Total available at SF after production
+    const totalAvailable=sfCarryIn+newProduced;
+    // Ship exactly what UNFI needs; hold the rest at SF
+    const actualShipped=Math.min(shipUnits,totalAvailable);
+    const hold=Math.max(0,totalAvailable-actualShipped);
+    return{shipP:Math.floor(actualShipped/up),shipUnits:actualShipped,
+           newProduced,totes,totalAvailable,hold};
+  }
+
+  if(sku.type==='fast'){
+    const r=computeRun(TARGET_LOW,0); // no max — ship what's needed
+    produced=r.newProduced;
+    shipped=r.shipUnits;
+    sfStrategicHold=r.hold;
+
+  } else if(sku.type==='slowmover'){
+    // Target 11 wks peak; cap ship at sku.shipPals as a soft guide
+    const r=computeRun(TARGET_HIGH,sku.shipPals);
+    produced=r.newProduced;
+    // Slow movers must produce at least 1 tote even if carry-in covers shipment
+    if(produced===0&&r.shipUnits>0)produced=ut;
+    shipped=r.shipUnits;
+    sfStrategicHold=r.hold+(produced-r.newProduced); // extra tote goes to SF hold
+
+  } else {
+    // Baking: only fires when UNFI < 8 wks
+    const curWks=unfiQoh/Math.max(0.01,wk);
+    if(curWks<8){
+      const r=computeRun(TARGET_HIGH,sku.shipPals);
+      produced=r.newProduced;
+      if(produced===0&&r.shipUnits>0)produced=ut;
+      shipped=r.shipUnits;
+      sfStrategicHold=r.hold+(produced-r.newProduced);
+    }
+  }
+
+  const totalAvailable=sfCarryIn+produced;
+  const carryOut=Math.max(0,totalAvailable-shipped-sfStrategicHold);
+  const unfiAfter=unfiQoh+shipped;
+
+  return{
+    carryIn:sfCarryIn,carryInP:sfCarryIn/up,produced,
+    prodPals:produced>0?Math.floor(produced/up):0,
+    prodTotes:produced>0?Math.floor(produced/ut):0,
+    consumed,shipped,
+    shipPals:shipped>0?Math.floor(shipped/up):0,
+    carryOut,carryOutP:carryOut/up,
+    sfStrategicHold,sfStrategicHoldPals:Math.round(sfStrategicHold/up),
+    unfiBeforeWks:unfiQoh/Math.max(0.01,wk),
+    unfiAfterWks:unfiAfter/Math.max(0.01,wk),
+    skipped:sku.type==='baking'&&shipped===0,
+    cyclePos
+  };
+}
+
+function projectRuns(liveQoh,currentAw,confirmedPOs){
+  const sf={};
+  for(const s of SKUS)sf[s.id]=0;
+  const sfStrategic={cook:0,canal:0,bake:0};
+  const TROUGH_FLOOR=3;
+  const LEAD_WEEKS=10;
+  const TARGET_WKS=10;
+
+  // Apply confirmed POs to current QOH (all treated as arriving now)
+  const unfi={...liveQoh};
+  for(const po of (confirmedPOs||[])){
+    for(const sku of SKUS){
+      const units=(po.skuUnits||{})[sku.id]||0;
+      if(units>0)unfi[sku.id]=(unfi[sku.id]||0)+units;
+    }
+  }
+
+  // Evaluate post-PO inventory ONCE before the loop
+  // Fill run fires immediately if any fast mover is below 10-week target after POs
+  const needsFillRun=SKUS.filter(s=>s.type==='fast').some(sku=>{
+    const woh=(unfi[sku.id]||0)/Math.max(0.01,wklyDemand(sku,currentAw));
+    return woh<TARGET_WKS;
+  });
+  const isOos=SKUS.filter(s=>s.type==='fast').some(sku=>{
+    const woh=(unfi[sku.id]||0)/Math.max(0.01,wklyDemand(sku,currentAw));
+    return woh<=TROUGH_FLOOR;
+  });
+
+  const proposed=[];
+  let searchFromAw=currentAw;
+
+  for(let runNum=0;runNum<3;runNum++){
+    let runAw;
+
+    if((needsFillRun||isOos)&&runNum===0){
+      // Fill run immediately — post-PO inventory still below 10-week target
+      runAw=currentAw+1;
+    } else {
+      // Scan forward to find when first fast mover hits trough floor
+      const simUnfi={...unfi};
+      runAw=searchFromAw+7;
+      for(let offset=1;offset<=16;offset++){
+        const checkAw=searchFromAw+offset;
+        for(const sku of SKUS){
+          simUnfi[sku.id]=Math.max(0,(simUnfi[sku.id]||0)-wklyDemand(sku,checkAw));
+        }
+        const anyLow=SKUS.filter(s=>s.type==='fast').some(sku=>{
+          const woh=simUnfi[sku.id]/Math.max(0.01,wklyDemand(sku,checkAw));
+          return woh<=TROUGH_FLOOR;
+        });
+        if(anyLow){runAw=checkAw;break;}
+      }
+      runAw=Math.max(runAw,searchFromAw+4);
+    }
+
+    const afterAw=runAw+7;
+    const{yr,cal,mo}=resolveAw(runAw);
+
+    for(const sku of SKUS){
+      unfi[sku.id]=Math.max(0,(unfi[sku.id]||0)-demandBetween(sku,searchFromAw,runAw));
+    }
+
+    const detail={};let tpp=0,tsp=0,tpt=0;
+    for(const sku of SKUS){
+      const skuType=sku.type;
+      let sfCarryIn=sf[sku.id]||0;
+      if(skuType==='slowmover'||skuType==='baking'){sfCarryIn+=sfStrategic[sku.id];}
+      const d=calcRun(sku,unfi[sku.id]||0,sfCarryIn,runAw,afterAw,0);
+      detail[sku.id]=d;
+      tpp+=d.prodPals;tsp+=d.shipPals;tpt+=d.prodTotes;
+      sf[sku.id]=d.carryOut;
+      if(skuType==='slowmover'||skuType==='baking'){
+        sfStrategic[sku.id]=d.sfStrategicHold;
+      }
+      unfi[sku.id]=Math.max(0,(unfi[sku.id]||0)+d.shipped);
+    }
+
+    const moqStatus=tsp>=MOQ_FLEX_LOW&&tsp<=MOQ_FLEX_HIGH?'ok':tsp<MOQ_FLEX_LOW?'below':'above';
+    const poProposeByWk=Math.max(currentAw,runAw-LEAD_WEEKS);
+    const isImmediateFill=(needsFillRun||isOos)&&runNum===0;
+
+    proposed.push({aw:runAw,yr,cal,mo,moLabel:MO_NAMES[mo]+' '+yr,detail,
+      totalProdPals:tpp,totalShipPals:tsp,totalProdTotes:tpt,
+      trucksShip:Math.ceil(tsp/PALS_PER_TRUCK),moqStatus,
+      poProposeByWk,isImmediateFill,
+      sfStrategicSnapshot:{...sfStrategic}});
+
+    searchFromAw=runAw;
+  }
+  return proposed;
+}
+
+function checkEmergency(liveWoh,proposed){
+  const flags=[];
+  for(const sku of SKUS){const w=liveWoh[sku.id]||0;
+    if(w<=0)flags.push({type:'oos',msg:`${sku.name} is OUT OF STOCK at UNFI.`});
+    else if(w<2)flags.push({type:'oos',msg:`${sku.name} critically low — ${w.toFixed(1)} weeks on hand.`});
+  }
+  if(proposed[0])for(const sku of SKUS.filter(s=>s.type==='fast')){const d=proposed[0].detail[sku.id];if(d&&d.unfiAfterWks>12)flags.push({type:'overstock',msg:`${sku.name} will be ${d.unfiAfterWks.toFixed(1)} wks after Run 1 — consider reducing.`});}
+  return flags;
+}
+
+// ── COLORS ──
+function wksColor(w){return w<=0?'#dc2626':w<3?'#ea580c':w<=11?'#16a34a':'#d97706';}
+function wksLabel(w){if(w<=0)return'OOS';if(w<3)return`⚠ ${w.toFixed(1)}w`;if(w<=11)return`✓ ${w.toFixed(1)}w`;return`↑ ${w.toFixed(1)}w`;}
+function wksBg(w){return w<=0?'#fee2e2':w<3?'#fff7ed':w<=11?'#f0fdf4':'#fffbeb';}
+function pill(label,color){return`<span class="pill" style="background:${color}20;color:${color}">${label}</span>`;}
+function fmtDate(ts){if(!ts)return'';return new Date(ts).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});}
+
+// ── SESSION LOG ──
+function loadLog(){try{return JSON.parse(localStorage.getItem(STORAGE_KEY)||'[]');}catch(e){return[];}}
+function saveLog(log){try{localStorage.setItem(STORAGE_KEY,JSON.stringify(log));}catch(e){}}
+function appendSession(s){const log=loadLog();log.unshift(s);if(log.length>52)log.pop();saveLog(log);}
+function getLastSession(){return loadLog()[0]||null;}
+
+// ── EMAIL ──
+function buildEmail(r,liveQoh,liveWoh){
+  if(!r)return'';const L=[];
+  L.push(`Subject: Replenishment Order Proposal – 365 Organic Spray Oils – ${r.moLabel}`,'','Hi [UNFI Replenishment Team],','','Please find below our proposed production and delivery for the 365 Organic Spray Oil program.','','━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━',`PROPOSED SHIP DATE:  Week ${r.cal} — ${r.moLabel}`,`Total Pallets: ${r.totalShipPals}  |  Trucks: ${r.trucksShip} FTL (${PALS_PER_TRUCK} pals/truck)`,'━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━','','SKU-LEVEL DETAIL:','');
+  for(const sku of SKUS){const d=r.detail[sku.id];if(!d||d.shipPals===0)continue;L.push(`  ${sku.name}`,`    Current inventory:  ${(liveQoh[sku.id]||0).toLocaleString()} units (${(liveWoh[sku.id]||0).toFixed(1)} weeks)`,`    Proposed shipment:  ${d.shipPals} pallets (${d.shipped.toLocaleString()} units)`,`    Inventory after delivery: ${d.unfiAfterWks.toFixed(1)} weeks`,'');}
+  L.push('SKUs NOT IN THIS SHIPMENT:');
+  for(const sku of SKUS){const d=r.detail[sku.id];if(!d||d.shipPals>0)continue;L.push(`  ${sku.name} — ${d.skipped?'sufficient stock, skip this cycle':'no replenishment needed'} (${(liveWoh[sku.id]||0).toFixed(1)} wks)`);}
+  L.push('','Please issue a PO at your earliest convenience. We request 10-week lead time from PO to delivery.','','Best regards,','[Your Name]','Sabre Private Label Group — on behalf of Sabbel Foods LLC');
+  return L.join('\n');
+}
+
+// ── SKU MATCH ──
+function matchSku(desc){
+  // Product names from OMS: "365 Avocado Cooking Spray 5oz (12pk)"
+  // "Cooking Spray" appears in ALL product names — must use oil type as primary key
+  const u=(desc||'').toUpperCase();
+  // Step 1: identify oil type (most specific first)
+  if(u.includes('CANOLA'))return'canal';
+  if(u.includes('BAKING'))return'bake';
+  if(u.includes('VEGETABLE'))return'cook'; // only true cooking oil = vegetable base
+  // Avocado: check size (10oz = av10, 5oz = av5)
+  if(u.includes('AVOCADO')){
+    return(u.includes('10OZ')||u.includes('10 OZ')||u.includes('(6PK)')||u.includes(' 10OZ'))
+      ?'av10':'av5';
+  }
+  // EVOO / Olive: check size
+  if(u.includes('EVOO')||u.includes('OLIVE')){
+    return(u.includes('10OZ')||u.includes('10 OZ')||u.includes('(6PK)')||u.includes(' 10OZ'))
+      ?'ev10':'ev5';
+  }
+  // Organic Cooking Spray without other oil type identifier = cook
+  if(u.includes('COOKING')||u.includes('ORG COOK'))return'cook';
+  return null;
+}
+
+// ── DEMO DATA ──
+const DEMO_QOH={av5:90720,ev5:69984,av10:46500,ev10:40500,cook:30240,canal:28080,bake:21600};
+const DEMO_WOH={},DEMO_AVG={};
+for(const s of SKUS){const w=s.demand[5]/WKS_PER_MO[5];DEMO_WOH[s.id]=DEMO_QOH[s.id]/w;DEMO_AVG[s.id]=Math.round(w);}
+const DEMO_HISTORY={
+  av5:  [{weekNum:22,units:3800},{weekNum:23,units:3820},{weekNum:24,units:4050},{weekNum:25,units:4780},{weekNum:26,units:4850}],
+  ev5:  [{weekNum:22,units:3600},{weekNum:23,units:3650},{weekNum:24,units:3700},{weekNum:25,units:3680},{weekNum:26,units:3720}],
+  av10: [{weekNum:22,units:2300},{weekNum:23,units:2280},{weekNum:24,units:2310},{weekNum:25,units:2290},{weekNum:26,units:2320}],
+  ev10: [{weekNum:22,units:1740},{weekNum:23,units:1700},{weekNum:24,units:1420},{weekNum:25,units:1380},{weekNum:26,units:1350}],
+  cook: [{weekNum:22,units:1200},{weekNum:23,units:1230},{weekNum:24,units:1180},{weekNum:25,units:1210},{weekNum:26,units:1190}],
+  canal:[{weekNum:22,units:1150},{weekNum:23,units:1140},{weekNum:24,units:1160},{weekNum:25,units:1130},{weekNum:26,units:1170}],
+  bake: [{weekNum:22,units:680},{weekNum:23,units:700},{weekNum:24,units:690},{weekNum:25,units:710},{weekNum:26,units:695}],
+};
+// Demo POs — one existing, one new this week
+const DEMO_POS_RECONCILED = [
+  { poNum:'PO-2026-001', weekNum:34, status:'OPEN', pals:60, skuPals:{av5:20,ev5:14,av10:9,ev10:7,cook:4,canal:4,bake:2}, notes:'Run 2 — Aug', changeType:'unchanged', prev:{poNum:'PO-2026-001',weekNum:34,pals:60,status:'OPEN'} },
+  { poNum:'PO-2026-002', weekNum:40, status:'OPEN', pals:57, skuPals:{av5:17,ev5:12,av10:9,ev10:7,cook:4,canal:4,bake:4}, notes:'Run 3 — Oct', changeType:'new', prev:null },
+];
+
+// ════════════════════════════════════════════
+// STATE
+// ════════════════════════════════════════════
+let S={
+  tab:'planner',step:'upload',
+  fileName:'',poFileNames:[],parseErr:'',poParseErr:'',
+  liveQoh:{},liveWoh:{},liveAvg:{},scanHistory:null,histBaseline:null,isDemo:false,
+  // PO system
+  parsedPOs:[],          // raw from file
+  reconciledPOs:[],      // with changeType
+  confirmedPOs:[],       // locked into model after user confirms
+  poFileLoaded:false,
+  duplicatePOs:[],       // PO numbers appearing in multiple files
+  poFileBuffers:[],      // accumulates parsed POs from multiple drops
+  // Checks
+  demandFlags:[],demandFlagResolutions:{},
+  proposedRuns:[],emergencyFlags:[],
+  showEmail:false,emailCopied:false,
+  sessionNote:'',sessionSaved:false,
+  openHistoryId:null,
+};
+function set(patch){Object.assign(S,patch);render();}
+
+// ════════════════════════════════════════════
+// RENDER ROUTER
+// ════════════════════════════════════════════
+function render(){
+  const app=document.getElementById('app');
+  const isEmergency=S.emergencyFlags.length>0;
+  app.innerHTML=`
+    <div class="header ${S.step==='results'&&isEmergency?'emergency':''}">
+      <h1>${S.step==='results'&&isEmergency?'🚨 ':''}Sabbel Foods — WFM Spray Oil Weekly Planner${S.isDemo?'<span class="demo-badge">DEMO</span>':''}</h1>
+      <p>${S.step==='upload'?'Drop the UNFI vendor file + open PO export(s) to run this week\'s plan':`Inventory: ${S.fileName}${S.poFileNames&&S.poFileNames.length?' · POs: '+S.poFileNames.join(', '):''}`}</p>
+    </div>
+    <div class="tabs">
+      <div class="tab ${S.tab==='planner'?'active':''}" onclick="set({tab:'planner'})">📋 Weekly Planner</div>
+      <div class="tab ${S.tab==='history'?'active':''}" onclick="set({tab:'history'})">📂 Session History</div>
+    </div>
+    <div id="tc"></div>`;
+  const tc=document.getElementById('tc');
+  if(S.tab==='history')      tc.innerHTML=renderHistory();
+  else if(S.step==='upload') tc.innerHTML=renderUpload();
+  else if(S.step==='pos')    tc.innerHTML=renderPOs();
+  else if(S.step==='flags')  tc.innerHTML=renderFlags();
+  else if(S.step==='results')tc.innerHTML=renderResults();
+  bind();
+}
+
+// ── UPLOAD ──
+function renderUpload(){
+  const hasDrop=(id,label,sub,icon='📄')=>`
+    <div class="drop-zone" id="${id}" ondragover="dzOver(event,'${id}')" ondragleave="dzLeave('${id}')" ondrop="dzDropMulti(event,'${id}')">
+      <div class="dz-icon">${icon}</div>
+      <div class="dz-label">${label}</div>
+      <div class="dz-sub">${sub}</div>
+      <input type="file" id="${id}_input" accept=".xlsx,.xls,.csv" style="display:none" multiple>
+    </div>`;
+  return`
+<div class="card">
+  <p class="sec">Step 1 — Drop Your Weekly Files</p>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px">
+    <div>
+      <label style="margin-bottom:6px">UNFI Vendor File <span style="color:#dc2626">*</span></label>
+      ${hasDrop('dzVendor', S.fileName?'✓ '+S.fileName:'Drop Inventory File Here','Inventory_Levels tab · QOH · weekly scans','📦')}
+      ${S.parseErr?`<div class="danger" style="margin-top:6px;font-size:11px">${S.parseErr}</div>`:''}
+    </div>
+    <div>
+      <label style="margin-bottom:6px">Open PO Export <span style="color:#9ca3af">(optional)</span></label>
+      ${hasDrop('dzPO', S.poFileNames&&S.poFileNames.length?'✓ '+S.poFileNames.join(', '):'Drop PO Export(s) Here','Drop one or both PO files · duplicates will be flagged','📋')}
+      ${S.poParseErr?`<div class="danger" style="margin-top:6px;font-size:11px">${S.poParseErr}</div>`:''}
+    </div>
+  </div>
+  <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+    <button class="btn" id="proceedUpload" ${!S.liveQoh||Object.keys(S.liveQoh).length<4?'disabled style="opacity:0.4;cursor:not-allowed"':''}>Continue →</button>
+    <span style="color:#9ca3af;font-size:12px">or</span>
+    <button class="btn-demo" id="demoBtn">▶ Load Demo Data</button>
+  </div>
+</div>
+<div class="card good">
+  <strong>Each week the planner checks:</strong><br>
+  1. <strong>PO Register</strong> — new POs, changed quantities, closed orders<br>
+  2. <strong>Demand Trends</strong> — 2+ weeks ≥15% movement triggers a question<br>
+  3. <strong>Plan</strong> — next 3 runs recalculated from confirmed demand and open POs
+</div>`;}
+
+// ── PO REVIEW ──
+function renderPOs(){
+  const pos=S.reconciledPOs;
+  const stored=loadPORegister();
+  const hasChanges=pos.some(p=>p.changeType!=='unchanged');
+
+  const changeLabel={new:'NEW',updated:'CHANGED',closed:'CLOSED',unchanged:'No change'};
+  const changeColor={new:'#166534',updated:'#92400e',closed:'#991b1b',unchanged:'#6b7280'};
+  const rowClass={new:'po-row-new',updated:'po-row-updated',closed:'po-row-closed',unchanged:'po-row-unchanged'};
+
+  const rows=pos.map((p,i)=>{
+    const skuSummary=Object.entries(p.skuPals||{}).filter(([,v])=>v>0).map(([id,v])=>{const s=SKUS.find(x=>x.id===id);return s?`${s.short}: ${v}p`:''}).join(' · ')||'—';
+    const prevPals=p.prev?.pals||0;
+    const palChange=p.changeType==='updated'&&prevPals?` (was ${prevPals}p)`:p.changeType==='closed'?' (removed)':'';
+    return`<tr class="${rowClass[p.changeType]}">
+      <td style="padding:7px 10px;font-weight:700;color:#1565C0">${p.poNum}</td>
+      <td class="c">${p.weekNum?`Wk ${p.weekNum}`:'—'}</td>
+      <td class="r" style="font-weight:700">${p.pals?p.pals+'p':'-'}${palChange?`<span style="font-size:10px;color:${changeColor[p.changeType]}">${palChange}</span>`:''}</td>
+      <td style="padding:7px 10px;font-size:11px;color:#6b7280">${skuSummary}</td>
+      <td class="c"><span style="color:${changeColor[p.changeType]};font-weight:700;font-size:11px">${changeLabel[p.changeType]}</span></td>
+      <td class="c">
+        ${p.changeType!=='closed'?`<input type="checkbox" id="po_confirm_${i}" ${S.confirmedPOs.find(c=>c.poNum===p.poNum)?'checked':''} onchange="togglePOConfirm(${i},this.checked)" style="cursor:pointer">`:
+        `<span style="font-size:11px;color:#991b1b">Remove?</span><input type="checkbox" id="po_remove_${i}" onchange="togglePORemove(${i},this.checked)" style="cursor:pointer;margin-left:4px">`}
+      </td>
+    </tr>`;}).join('');
+
+  const noFileHtml = !S.poFileLoaded ? `
+    <div class="info" style="margin-bottom:12px">
+      No PO file dropped this week. Showing current PO register (${stored.length} PO${stored.length!==1?'s':''} on record).
+      These carry forward unchanged unless you drop a new export.
+    </div>` : '';
+  const dupHtml = S.duplicatePOs&&S.duplicatePOs.length ? S.duplicatePOs.map(d=>`
+    <div class="danger" style="margin-bottom:10px">
+      <strong>⚠ Duplicate PO: ${d.poNum}</strong> — this PO number appears in more than one file.<br>
+      <div style="margin-top:6px;font-size:11px">
+        ${d.versions.map((v,i)=>`<span style="margin-right:12px"><strong>File ${i+1}:</strong> ${v.sourceFile} — ${v.totalUnits||0} units${v.weekNum?' · Wk '+v.weekNum:''}</span>`).join('')}
+      </div>
+      <div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap">
+        ${d.versions.map((v,i)=>`<button class="btn-sm" onclick="resolveDuplicate('${d.poNum}',${i})" style="font-size:11px">Use File ${i+1} (${v.sourceFile.split('-')[0]})</button>`).join('')}
+      </div>
+    </div>`).join('') : '';
+
+  const noPOs = pos.length === 0 ? `<div class="good">No open POs on record. The model will project runs from current inventory only.</div>` : '';
+
+  return`
+<div class="card">
+  <p class="sec">Open PO Register${hasChanges?' — Changes Detected':''}</p>
+  ${noFileHtml}
+  ${dupHtml}
+  ${noPOs}
+  ${pos.length>0?`
+  <table>
+    <thead><tr><th>PO Number</th><th class="c">Ship Week</th><th class="r">Pallets</th><th>SKU Mix</th><th class="r">Units</th><th class="c">Status</th><th class="c">Include in Plan</th></tr></thead>
+    <tbody>${rows}</tbody>
+  </table>
+  <div style="font-size:11px;color:#6b7280;margin-top:8px">
+    Check the box to include a PO in the forward plan. Uncheck to exclude (e.g. if quantities changed and you're waiting for confirmation).
+  </div>`:''}
+</div>
+<div style="display:flex;justify-content:flex-end;gap:10px;margin:0 12px 12px">
+  <button class="btn-sm" onclick="set({step:'upload'})">← Back</button>
+  <button class="btn" id="proceedPOs">Continue to Demand Checks →</button>
+</div>`;}
+
+// ── DEMAND FLAGS ──
+function renderFlags(){
+  const dfFlags=S.demandFlags;
+  const hasIssues=dfFlags.length>0;
+  const allResolved=dfFlags.every(f=>S.demandFlagResolutions[f.skuId+'_'+f.dir]);
+
+  const demandHtml=dfFlags.map((f,i)=>{
+    const dir=f.dir==='up',color=dir?'#ea580c':'#2563eb',bgClass=dir?'trend-up':'trend-down',icon=dir?'📈':'📉';
+    const avgPctStr=(f.avgPct>=0?'+':'')+Math.round(f.avgPct*100)+'%';
+    const maxU=Math.max(...f.weeks.map(w=>w.units),...f.weeks.map(w=>w.baseline));
+    const bars=f.weeks.map(w=>{const fh=Math.round((w.units/maxU)*40),bh=Math.round((w.baseline/maxU)*40),wp=(w.units>=w.baseline?'+':'')+Math.round((w.units-w.baseline)/w.baseline*100)+'%';
+      return`<div class="trend-week"><div class="trend-pct" style="color:${w.units>w.baseline?'#ea580c':'#2563eb'}">${wp}</div>
+        <div style="display:flex;gap:2px;align-items:flex-end"><div class="trend-bar-fill" style="height:${fh}px;background:${color}"></div><div class="trend-bar-fill" style="height:${bh}px;background:#d1d5db"></div></div>
+        <div class="trend-label">Wk${w.weekNum}</div></div>`;}).join('');
+    const res=S.demandFlagResolutions[f.skuId+'_'+f.dir]||'';
+    return`<div class="flag-card ${bgClass}">
+      <div class="flag-header"><div class="flag-title" style="color:${color}">${icon} ${f.skuName} — ${f.isDrift?'2026 YTD '+(dir?'Above':'Below')+' Prior Year (avg '+avgPctStr+', '+f.monthsCompared+' months)':((dir?'Running Above':'Running Below')+' Baseline (avg '+avgPctStr+', '+f.weeks.length+' wks)')}</div></div>
+      <div class="flag-body">${f.isDrift?'2026 YTD is '+avgPctStr+' vs same months in 2025 ('+f.monthsCompared+' months compared). May indicate a structural demand shift.':'Actual scans are '+avgPctStr+' vs the long-term baseline for '+f.weeks.length+' consecutive weeks.'} What's driving this?</div>
+      <div style="margin-bottom:12px"><div style="font-size:11px;color:#6b7280;margin-bottom:4px">Actual vs Baseline</div><div class="trend-bar">${bars}</div></div>
+      <div class="resolve-row">
+        <select onchange="setDemandRes('${f.skuId}','${f.dir}',this.value)" style="min-width:260px">
+          <option value="">— What's driving this? —</option>
+          ${f.oosLikely?'<option value="oos_store" '+(res==='oos_store'?'selected':'')+'>🔴 Out of stock at store level — hold baseline, watch recovery</option>':''}
+          <option value="oos"        ${res==='oos'?'selected':''}>⚠️ OOS recovery — scans low/high from prior OOS, don't update yet</option>
+          <option value="promo"      ${res==='promo'?'selected':''}>🏷️ Promotion — temporary spike, don't update baseline</option>
+          <option value="real_shift" ${res==='real_shift'?'selected':''}>📊 Real demand shift — update the model</option>
+          <option value="noise"      ${res==='noise'?'selected':''}>〰️ Noise / one-off — ignore for now</option>
+        </select>
+        ${f.oosLikely?'<div class="danger" style="margin-top:6px;font-size:11px"><strong>⚠ Accelerating decline detected</strong> — pattern consistent with stores going out of stock. Baseline should NOT be reduced until confirmed otherwise.</div>':''}
+      </div>
+      ${res==='oos_store'?`<div class="danger" style="margin-top:8px"><strong>Store OOS confirmed.</strong> Baseline held unchanged — the drop reflects missing sales, not reduced demand. Model will flag if scan recovery doesn't appear within 3 weeks.</div>`:''}
+      ${res==='oos'?`<div class="alert" style="margin-top:8px">OOS recovery noted — baseline unchanged. Watching for scan normalisation next 2–3 weeks before considering a re-baseline.</div>`:''}
+      ${res==='real_shift'?`<div class="info" style="margin-top:8px">Model will adjust ${f.skuName} baseline by ${avgPctStr} for affected months.</div>`:''}
+      ${res==='promo'?`<div class="good" style="margin-top:8px">Promotion noted — baseline unchanged. Will monitor for return to normal scans.</div>`:''}
+      ${res==='noise'?`<div class="info" style="margin-top:8px">Flagged as noise — will re-check if pattern continues next week.</div>`:''}
+    </div>`;}).join('');
+
+  return`
+<div class="card">
+  <p class="sec ${hasIssues?'amber':''}">
+    ${hasIssues?`⚡ Demand Checks — ${dfFlags.length} item${dfFlags.length!==1?'s':''} need your input`:'✓ Demand Checks — All Clear'}
+  </p>
+  ${!hasIssues?'<div class="good">No demand anomalies detected this week. All SKUs tracking within 15% of baseline.</div>':''}
+  ${demandHtml}
+</div>
+<div style="display:flex;justify-content:flex-end;gap:10px;margin:0 12px 12px">
+  <button class="btn-sm" onclick="set({step:'pos'})">← Back to POs</button>
+  <button class="btn" id="proceedFlags" ${hasIssues&&!allResolved?'disabled style="opacity:0.4;cursor:not-allowed"':''}>
+    ${hasIssues&&!allResolved?'Answer all items above to continue':'Run This Week\'s Plan →'}
+  </button>
+</div>`;}
+
+// ── RESULTS ──
+function renderResults(){
+  const isEmergency=S.emergencyFlags.length>0;
+  const emergHtml=isEmergency?`<div class="card"><p class="sec red">⚠ Action Required</p>${S.emergencyFlags.map(f=>`<div class="${f.type==='oos'?'danger':'alert'}">${f.msg}</div>`).join('')}</div>`:'';
+  const wohTiles=SKUS.map(sku=>{const w=S.liveWoh[sku.id]||0;return`<div class="woh-tile" style="border-color:${wksColor(w)}40;background:${wksBg(w)}"><div class="short">${sku.short}</div><div class="woh" style="color:${wksColor(w)}">${wksLabel(w)}</div><div class="units">${(S.liveQoh[sku.id]||0).toLocaleString()} units</div></div>`;}).join('');
+
+  // Open PO summary strip
+  const activePOs=S.confirmedPOs||[];
+  const poStrip=activePOs.length?`<div class="card" style="padding:12px 18px">
+    <p class="sec" style="margin-bottom:8px">Open POs in Plan</p>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      ${activePOs.map(p=>`${pill(p.poNum,'#1565C0')}${pill('Wk '+p.weekNum,'#0f766e')}${pill(p.pals+'p','#6d28d9')}<span style="font-size:11px;color:#6b7280;margin-right:12px">${p.notes||''}</span>`).join('')}
+    </div>
+  </div>`:'';
+
+  const runsHtml=S.proposedRuns.map((r,ri)=>{
+    const rl=ri===0?(r.isImmediateFill?'🚨 Fill Run — Immediate':' ★ Proposed Run 1'):ri===1?'Proposed Run 2':'Proposed Run 3';
+    const moqPill=r.moqStatus==='ok'?pill(`${r.totalShipPals}p — ✓ Clean Run`,'#166534')
+      :r.moqStatus==='below'?pill(`${r.totalShipPals}p — ⚡ Below ${STANDARD_MOQ}-pal MOQ`,'#dc2626')
+      :pill(`${r.totalShipPals}p — Above MOQ`,'#92400e');
+    const rows=SKUS.map(sku=>{const d=r.detail[sku.id];if(!d)return'';
+      return`<tr><td style="padding:7px 10px"><strong style="color:#1565C0;font-size:11px">${sku.short}</strong></td>
+        <td class="r" style="color:${d.carryInP>0.05?'#0f766e':'#d1d5db'}">${d.carryInP>0.05?`${d.carryInP.toFixed(1)}p`:'—'}</td>
+        <td class="r" style="color:${d.prodPals>0?'#166534':'#d1d5db'};font-weight:${d.prodPals>0?700:400}">${d.prodPals>0?`${d.prodPals}p`:'—'}</td>
+        <td class="r" style="color:${d.prodTotes>0?'#6d28d9':'#d1d5db'};font-weight:${d.prodTotes>0?700:400}">${d.prodTotes>0?`${d.prodTotes}T`:'—'}</td>
+        <td class="r" style="color:${d.shipPals>0?'#1565C0':'#d1d5db'};font-weight:${d.shipPals>0?700:400}">${d.shipPals>0?`${d.shipPals}p`:d.skipped?'SKIP':'—'}</td>
+        <td class="r" style="color:${d.sfStrategicHoldPals>0?'#1565C0':'#d1d5db'};font-weight:${d.sfStrategicHoldPals>0?700:400}">${d.sfStrategicHoldPals>0?`${d.sfStrategicHoldPals}p ✋`:'—'}</td>
+        <td class="r" style="color:${d.carryOutP>0.5?'#d97706':'#d1d5db'}">${d.carryOutP>0.05?`${d.carryOutP.toFixed(1)}p`:'—'}</td>
+        <td class="c"><span style="color:${wksColor(d.unfiBeforeWks)};font-weight:600">${wksLabel(d.unfiBeforeWks)}</span></td>
+        <td class="c" style="background:${wksBg(d.unfiAfterWks)}"><span style="color:${wksColor(d.unfiAfterWks)};font-weight:700">${wksLabel(d.unfiAfterWks)}</span></td>
+      </tr>`;}).join('');
+    const emailSection=ri===0&&S.showEmail?`<div class="email-box"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><strong style="font-size:12px;color:#1565C0">UNFI Proposal Email</strong><button class="btn-sm" id="copyEmail">${S.emailCopied?'✓ Copied!':'Copy'}</button></div><pre id="emailText">${buildEmail(r,S.liveQoh,S.liveWoh)}</pre></div>`:'';
+    return`<div class="card ${ri===0?'run1':''}">
+      <div class="run-header">
+        <div><p class="sec" style="margin-bottom:6px">${rl} — Week ${r.cal} (${r.moLabel})</p>
+        <div>${moqPill}${pill(`${r.totalProdTotes}T produced`,'#6d28d9')}${pill(`${r.trucksShip} truck${r.trucksShip!==1?'s':''} × ${PALS_PER_TRUCK}p`,'#0f766e')}
+        ${r.poProposeByWk&&r.poProposeByWk>=CURRENT_AW?pill(`PO by Wk ${r.poProposeByWk}`,'#92400e'):''}
+        ${r.oosAlert?pill('🚨 OOS Risk','#dc2626'):''}</div></div>
+        ${ri===0?`<button class="${S.showEmail?'btn-sm':'btn-green'}" id="toggleEmail">${S.showEmail?'Hide Email':'Draft UNFI Email ✉'}</button>`:''}
+      </div>
+      <table><thead><tr><th>SKU</th><th class="r">SF Carry-In</th><th class="r">Produced</th><th class="r">Totes</th><th class="r">Shipped→UNFI</th><th class="r">SF Hold</th><th class="r">SF Carry-Out</th><th class="c">UNFI Before</th><th class="c">UNFI After↑</th></tr></thead>
+      <tbody>${rows}<tr class="total"><td>TOTAL</td><td></td><td class="r" style="color:#166534">${r.totalProdPals}p</td><td class="r" style="color:#6d28d9">${r.totalProdTotes}T</td><td class="r" style="color:#1565C0">${r.totalShipPals}p</td><td class="r" style="color:#1565C0;font-size:10px">${Object.values(r.sfStrategicSnapshot||{}).reduce((a,b)=>a+b,0)>0?Math.round(Object.values(r.sfStrategicSnapshot||{}).reduce((a,b)=>a+b,0)/2160)+'p held':'—'}</td><td></td><td></td><td></td></tr></tbody></table>
+      ${emailSection}
+    </div>`;}).join('');
+
+  // ── OIL TYPE DEFINITIONS ──
+  const OIL_TYPES = [
+    { id:'avocado', label:'Avocado Oil',  skus:['av5','av10'], color:'#166534' },
+    { id:'evoo',    label:'EVOO',         skus:['ev5','ev10'], color:'#0f766e' },
+    { id:'cooking', label:'Cooking Oil',  skus:['cook'],       color:'#92400e' },
+    { id:'canola',  label:'Canola Oil',   skus:['canal'],      color:'#1565C0' },
+    { id:'baking',  label:'Baking Oil',   skus:['bake'],       color:'#6d28d9' },
+  ];
+
+  // ── 3-MONTH INVENTORY CHECK ──
+  // Per run: units per SKU + totes per oil type needed to produce
+  const threeMonthRunRows = S.proposedRuns.map((r,ri)=>{
+    const skuCells = SKUS.map(sku=>{
+      const d = r.detail[sku.id];
+      const units = d ? d.produced : 0;
+      return `<td class="r" style="font-size:11px">${units>0?units.toLocaleString():'—'}</td>`;
+    }).join('');
+    const oilCells = OIL_TYPES.map(ot=>{
+      const totes = ot.skus.reduce((t,id)=>{const d=r.detail[id];return t+(d?d.prodTotes:0);},0);
+      return `<td class="r" style="font-weight:${totes>0?700:400};color:${totes>0?ot.color:'#d1d5db'}">${totes>0?totes+'T':'—'}</td>`;
+    }).join('');
+    const runLabel = ri===0?'Run 1':ri===1?'Run 2':'Run 3';
+    return `<tr>
+      <td style="padding:7px 10px;font-weight:700;color:#1565C0">Wk ${r.cal}<br><span style="font-size:10px;color:#6b7280;font-weight:400">${r.moLabel}</span></td>
+      ${skuCells}${oilCells}
+    </tr>`;
+  }).join('');
+
+  // Totals row for 3-month
+  const skuTotalCells3mo = SKUS.map(sku=>{
+    const total = S.proposedRuns.reduce((t,r)=>{const d=r.detail[sku.id];return t+(d?d.produced:0);},0);
+    return `<td class="r" style="font-size:11px;font-weight:700">${total>0?total.toLocaleString():'—'}</td>`;
+  }).join('');
+  const oilTotalCells3mo = OIL_TYPES.map(ot=>{
+    const total = S.proposedRuns.reduce((t,r)=>t+ot.skus.reduce((s,id)=>{const d=r.detail[id];return s+(d?d.prodTotes:0);},0),0);
+    return `<td class="r" style="font-weight:700;color:${ot.color}">${total>0?total+'T':'—'}</td>`;
+  }).join('');
+
+  const skuHeaders3mo = SKUS.map(s=>`<th class="r" style="font-size:10px">${s.short}</th>`).join('');
+  const oilHeaders3mo = OIL_TYPES.map(ot=>`<th class="r" style="font-size:10px;color:${ot.color}">${ot.label}</th>`).join('');
+
+  // ── ANNUAL FORECAST ──
+  const af=8/Math.max(1,S.proposedRuns.length);
+  const annBySkuProdUnits={}, annBySkuScanUnits={};
+  for(const sku of SKUS){
+    annBySkuProdUnits[sku.id]=Math.round(S.proposedRuns.reduce((t,r)=>{const d=r.detail[sku.id];return t+(d?d.produced:0);},0)*af);
+    annBySkuScanUnits[sku.id]=sku.demand.reduce((t,d)=>t+d,0);
+  }
+
+  // Annual SKU rows — cans
+  const annSkuRows = SKUS.map(sku=>{
+    const prod = annBySkuProdUnits[sku.id]||0;
+    const scan = annBySkuScanUnits[sku.id]||0;
+    const diff = prod - scan;
+    return`<tr>
+      <td style="padding:7px 10px"><strong style="color:#1565C0;font-size:11px">${sku.name}</strong></td>
+      <td class="r">${prod.toLocaleString()}</td>
+      <td class="r" style="color:#6b7280">${scan.toLocaleString()}</td>
+      <td class="r" style="color:${diff<0?'#dc2626':'#166534'};font-weight:700">${diff>0?'+':''}${diff.toLocaleString()}</td>
+    </tr>`;
+  }).join('');
+
+  const annSkuTotProd = SKUS.reduce((t,s)=>t+(annBySkuProdUnits[s.id]||0),0);
+  const annSkuTotScan = SKUS.reduce((t,s)=>t+(annBySkuScanUnits[s.id]||0),0);
+  const annSkuTotDiff = annSkuTotProd - annSkuTotScan;
+
+  // Annual oil type rows — totes + gallons
+  const annOilRows = OIL_TYPES.map(ot=>{
+    const prodTotes = Math.round(S.proposedRuns.reduce((t,r)=>t+ot.skus.reduce((s,id)=>{const d=r.detail[id];return s+(d?d.prodTotes:0);},0),0)*af);
+    const gallons = prodTotes * 275;
+    // Scan totes = total scan units / units per tote (use fill size of first sku in group)
+    const firstSku = SKUS.find(s=>s.id===ot.skus[0]);
+    const scanUnits = ot.skus.reduce((t,id)=>t+(annBySkuScanUnits[id]||0),0);
+    const scanTotes = Math.ceil(scanUnits / UNITS_TOTE[firstSku.fill]);
+    return`<tr>
+      <td style="padding:7px 10px"><strong style="color:${ot.color};font-size:12px">${ot.label}</strong>
+        <div style="font-size:10px;color:#9ca3af">${ot.skus.map(id=>SKUS.find(s=>s.id===id).short).join(' + ')}</div>
+      </td>
+      <td class="r" style="font-weight:700;color:${ot.color}">${prodTotes}T</td>
+      <td class="r" style="color:#6b7280">${scanTotes}T</td>
+      <td class="r" style="color:#6b7280">${gallons.toLocaleString()} gal</td>
+    </tr>`;
+  }).join('');
+
+  const annTotProdTotes = OIL_TYPES.reduce((t,ot)=>t+Math.round(S.proposedRuns.reduce((s,r)=>s+ot.skus.reduce((x,id)=>{const d=r.detail[id];return x+(d?d.prodTotes:0);},0),0)*af),0);
+  const annTotGallons = annTotProdTotes * 275;
+
+  const sb=(v,l,c)=>`<div class="stat" style="border:2px solid ${c}20"><div class="num" style="color:${c}">${v}</div><div class="lbl">${l}</div></div>`;
+  const qtrTrucks=S.proposedRuns.reduce((t,r)=>t+r.trucksShip,0);
+  const qtrTotes=S.proposedRuns.reduce((t,r)=>t+r.totalProdTotes,0);
+  const qtrPals=S.proposedRuns.reduce((t,r)=>t+r.totalShipPals,0);
+
+  const rebaselined=S.demandFlags.filter(f=>S.demandFlagResolutions[f.skuId+'_'+f.dir]==='real_shift');
+  const rebaselineNote=rebaselined.length?`<div class="card info"><p class="sec" style="color:#1e40af;border-color:#bfdbfe">📊 Demand Updated This Session</p>${rebaselined.map(f=>`<div style="font-size:12px;margin-bottom:4px">• <strong>${f.skuName}</strong> adjusted ${f.avgPct>=0?'+':''}${Math.round(f.avgPct*100)}% for affected months</div>`).join('')}<div style="font-size:11px;color:#6b7280;margin-top:6px">Saved to this browser. Tell Claude in the Project to make this permanent.</div></div>`:'' ;
+
+  const saveBox=`<div class="card" style="border:2px solid #dbeafe">
+    <p class="sec">💾 Save This Session to History</p>
+    <div style="margin-bottom:10px"><label>Session notes (optional)</label>
+    <textarea rows="3" id="sessionNoteInput" placeholder="e.g. Run 1 PO confirmed. Av5oz demand running hot — flagged as promo. No changes to locked runs.">${S.sessionNote}</textarea></div>
+    ${S.sessionSaved?`<div class="good">✓ Saved.</div>`:`<button class="btn" id="saveSessionBtn">Save to History</button>`}
+  </div>`;
+
+
+  // ── INVENTORY FLOW WATERFALL ──
+  const waterfallRows=SKUS.map(sku=>{
+    const wk=wklyDemand(sku,CURRENT_AW);
+    const curQoh=S.liveQoh[sku.id]||0;
+    const curWoh=curQoh/Math.max(0.01,wk);
+    const events=[];
+    for(const po of (S.confirmedPOs||[])){
+      const u=(po.skuUnits||{})[sku.id]||0;
+      const evWk=po.weekNum||CURRENT_AW;
+      // Show PO number prominently
+      const evLbl='PO '+po.poNum+(po.weekNum?'':' (TBD)');
+      events.push({label:evLbl,weekNum:evWk,units:u,isPo:true}); // include even if u=0 to show gap
+    }
+    for(const [ri,r] of S.proposedRuns.entries()){
+      const d=r.detail[sku.id];
+      if(d&&d.shipped>0)events.push({label:'Run '+(ri+1),weekNum:r.aw,units:d.shipped,isPo:false});
+    }
+    events.sort((a,b)=>a.weekNum-b.weekNum);
+    // Remove PO events with 0 units for this SKU but keep structure
+    const skuEvents=events.filter(e=>e.units>0||!e.isPo);
+    let qoh=curQoh,prevWk=CURRENT_AW;
+    const cells=[{qoh:curQoh,woh:curWoh,bold:false,label:'Now'}];
+    for(const ev of skuEvents.slice(0,5)){  // show up to 5 events
+      const dep=Math.max(0,qoh-demandBetween(sku,prevWk,ev.weekNum));
+      cells.push({qoh:Math.round(dep),woh:dep/Math.max(0.01,wk),bold:false});
+      qoh=dep+ev.units;
+      cells.push({qoh:Math.round(qoh),woh:qoh/Math.max(0.01,wk),bold:true});
+      prevWk=ev.weekNum;
+    }
+    const r1=S.proposedRuns[0];
+    const sugg=r1?r1.detail[sku.id]:null;
+    const suggStr=sugg&&sugg.shipped>0?sugg.shipPals+'p / '+sugg.prodTotes+'T':'—';
+    const suggWk=r1?'Wk'+r1.cal+' ('+r1.moLabel+')':'—';
+    const cellsHtml=cells.map(c=>{
+      const bg=wksBg(c.woh),col=wksColor(c.woh);
+      return'<td style="padding:5px 8px;background:'+bg+';text-align:center;border-bottom:1px solid #f3f4f6"><div style="color:'+col+';font-size:12px;font-weight:'+(c.bold?700:500)+'">'+(c.woh<=0?'OOS':c.woh.toFixed(1)+'w')+'</div><div style="font-size:10px;color:#6b7280">'+c.qoh.toLocaleString()+'</div></td>';
+    }).join('');
+    const pad='<td style="padding:5px 8px;text-align:center;color:#e5e7eb;border-bottom:1px solid #f3f4f6">—</td>';
+    const maxCols=1+(skuEvents.slice(0,5).length*2); // now + (before+after)×events
+    const padded=cellsHtml+(cells.length<maxCols?pad.repeat(maxCols-cells.length):'');
+    return'<tr><td style="padding:5px 8px;font-size:11px;font-weight:700;color:#1565C0;border-bottom:1px solid #f3f4f6">'+sku.short+'</td>'+padded+'<td style="padding:5px 8px;text-align:center;font-size:11px;font-weight:700;color:#166534;border-bottom:1px solid #f3f4f6">'+suggStr+'</td><td style="padding:5px 8px;font-size:10px;color:#6b7280;border-bottom:1px solid #f3f4f6">'+suggWk+'</td></tr>';
+  }).join('');
+  const waterfallHtml='<div class="card"><p class="sec">Inventory Flow — Current Through Next 3 Events</p><div style="font-size:11px;color:#6b7280;margin-bottom:8px">Weeks on hand (large) and units (small). <span style="color:#16a34a">Green</span> = on target · <span style="color:#d97706">Amber</span> = high · <span style="color:#ea580c">Orange/Red</span> = low or OOS. Bold = after delivery.</div><div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:12px"><thead><tr style="background:#dbeafe"><th style="padding:6px 8px;text-align:left;color:#1565C0;font-size:11px">SKU</th><th style="padding:6px 8px;text-align:center;color:#1565C0;font-size:11px">Now</th><th style="padding:6px 8px;text-align:center;color:#6b7280;font-size:10px">Bef Ev1</th><th style="padding:6px 8px;text-align:center;color:#1565C0;font-size:10px;font-weight:700">Aft Ev1</th><th style="padding:6px 8px;text-align:center;color:#6b7280;font-size:10px">Bef Ev2</th><th style="padding:6px 8px;text-align:center;color:#1565C0;font-size:10px;font-weight:700">Aft Ev2</th><th style="padding:6px 8px;text-align:center;color:#6b7280;font-size:10px">Bef Ev3</th><th style="padding:6px 8px;text-align:center;color:#1565C0;font-size:10px;font-weight:700">Aft Ev3</th><th style="padding:6px 8px;text-align:center;color:#166534;font-size:11px">Suggested<br>Order</th><th style="padding:6px 8px;text-align:center;color:#166534;font-size:10px">Propose By</th></tr></thead><tbody>'+waterfallRows+'</tbody></table></div></div>';
+
+  // ── DEMAND SUMMARY (shown after demand checks are resolved) ──
+  const demandSummaryRows=SKUS.map(sku=>{
+    const annUnits=getSkuDemand(sku.id).reduce((a,b)=>a+b,0);
+    const annWkly=annUnits/52;
+    const up=UNITS_PAL[sku.fill],ut=UNITS_TOTE[sku.fill];
+    const annPals=Math.ceil(annUnits/up);
+    const annTotes=Math.ceil(annUnits/ut);
+    // Current month baseline from history if available
+    const {mo}=resolveAw(CURRENT_AW);
+    const histBl=S.histBaseline&&S.histBaseline[sku.id]?S.histBaseline[sku.id][mo]:0;
+    const blSrc=histBl>0?'History':'Model';
+    const curBl=histBl>0?histBl:wklyDemand(sku,CURRENT_AW);
+    // OOS/demand flag resolution
+    const flagRes=S.demandFlagResolutions?.[sku.id+'_down']||S.demandFlagResolutions?.[sku.id+'_up']||'';
+    const adj=flagRes==='real_shift'?'Updated':'';
+    const oosNote=flagRes==='oos_store'||flagRes==='oos'?'OOS':'';
+    const statusColor=oosNote?'#dc2626':adj?'#1565C0':'#6b7280';
+    const statusLabel=oosNote?'OOS — baseline held':adj?'Demand updated':'On baseline';
+    return'<tr><td style="padding:6px 8px;font-size:11px;font-weight:700;color:#1565C0">'+sku.name+'</td>'
+      +'<td style="text-align:right;padding:6px 8px">'+annUnits.toLocaleString()+'</td>'
+      +'<td style="text-align:right;padding:6px 8px">'+Math.round(annWkly).toLocaleString()+'</td>'
+      +'<td style="text-align:right;padding:6px 8px">'+Math.round(curBl).toLocaleString()+'</td>'
+      +'<td style="text-align:right;padding:6px 8px;color:#6d28d9;font-weight:700">'+annTotes+'T</td>'
+      +'<td style="text-align:right;padding:6px 8px;color:#1565C0">'+annPals+'p</td>'
+      +'<td style="padding:6px 8px;font-size:10px;color:'+statusColor+'">'+statusLabel+'</td>'
+      +'</tr>';
+  }).join('');
+  const demandSummaryHtml='<div class="card"><p class="sec">Demand Forecast — Working Baselines</p>'
+    +'<div style="font-size:11px;color:#6b7280;margin-bottom:8px">These are the demand figures the model is using to calculate run quantities and timing. Update via demand checks above if actuals diverge.</div>'
+    +'<table><thead><tr>'
+    +'<th>SKU</th><th class="r">Annual Units</th><th class="r">Avg Wkly</th><th class="r">Current Mo/wk</th><th class="r">Ann Totes</th><th class="r">Ann Pallets</th><th>Status</th>'
+    +'</tr></thead><tbody>'+demandSummaryRows+'</tbody></table></div>';
+
+  return`
+${!isEmergency?'<div class="card green-banner"><span style="color:#166534;font-weight:700;font-size:13px">✓ Inventory tracking to plan — no emergency action required.</span></div>':''}
+${emergHtml}${rebaselineNote}
+<div class="card"><p class="sec">Current UNFI Inventory</p><div class="woh-grid">${wohTiles}</div></div>
+${demandSummaryHtml}
+${poStrip}
+${waterfallHtml}
+${runsHtml}
+<div class="card">
+  <p class="sec">3-Month Inventory Check — Next 3 Runs</p>
+  <div style="font-size:12px;color:#6b7280;margin-bottom:10px">
+    Units = cans to produce per SKU &nbsp;·&nbsp; Oil totes = what Signature Filling needs to have on hand before each run
+  </div>
+  <div style="overflow-x:auto">
+  <table>
+    <thead>
+      <tr>
+        <th rowspan="2" style="vertical-align:bottom">Run</th>
+        <th class="c" colspan="${SKUS.length}" style="border-bottom:1px solid #93c5fd;color:#1565C0">Units to Produce (cans per SKU)</th>
+        <th class="c" colspan="${OIL_TYPES.length}" style="border-bottom:1px solid #93c5fd;color:#6d28d9">Oil Totes Needed</th>
+      </tr>
+      <tr>${skuHeaders3mo}${oilHeaders3mo}</tr>
+    </thead>
+    <tbody>${threeMonthRunRows}</tbody>
+    <tfoot>
+      <tr>
+        <td style="padding:7px 10px;font-weight:700">3-Run Total</td>
+        ${skuTotalCells3mo}${oilTotalCells3mo}
+      </tr>
+    </tfoot>
+  </table>
+  </div>
+  <div class="stats" style="margin-top:14px">
+    ${sb('3','Runs','#1565C0')}${sb(qtrTrucks,'Trucks ('+PALS_PER_TRUCK+'p ea)','#0f766e')}${sb(qtrTotes+'T','Total Oil Totes','#6d28d9')}${sb(qtrPals+'p','Total Ship Pallets','#166534')}
+  </div>
+</div>
+<div class="card">
+  <p class="sec">12-Month Forecast</p>
+  <div style="font-size:12px;color:#6b7280;margin-bottom:14px">
+    <strong>Planned Production</strong> = what Sabbel will make and ship to UNFI &nbsp;·&nbsp;
+    <strong>Projected Scans</strong> = what UNFI sells through to WFM stores &nbsp;·&nbsp;
+    Surplus is structural rounding from tote sizes
+  </div>
+
+  <p style="font-size:12px;font-weight:700;color:#374151;margin-bottom:8px">Cans by SKU</p>
+  <table style="margin-bottom:20px">
+    <thead><tr>
+      <th>SKU</th>
+      <th class="r">Planned Production<br><span style="font-weight:400;font-size:10px;color:#6b7280">cans</span></th>
+      <th class="r">Projected Scans<br><span style="font-weight:400;font-size:10px;color:#6b7280">cans</span></th>
+      <th class="r">Surplus<br><span style="font-weight:400;font-size:10px;color:#6b7280">cans</span></th>
+    </tr></thead>
+    <tbody>${annSkuRows}</tbody>
+    <tfoot><tr>
+      <td style="padding:7px 10px">TOTAL</td>
+      <td class="r" style="font-weight:700">${annSkuTotProd.toLocaleString()}</td>
+      <td class="r" style="font-weight:700;color:#6b7280">${annSkuTotScan.toLocaleString()}</td>
+      <td class="r" style="font-weight:700;color:${annSkuTotDiff<0?'#dc2626':'#166534'}">${annSkuTotDiff>0?'+':''}${annSkuTotDiff.toLocaleString()}</td>
+    </tr></tfoot>
+  </table>
+
+  <p style="font-size:12px;font-weight:700;color:#374151;margin-bottom:8px">Oil Totes by Type — for Signature Filling</p>
+  <table>
+    <thead><tr>
+      <th>Oil Type</th>
+      <th class="r">Production Totes<br><span style="font-weight:400;font-size:10px;color:#6b7280">to order</span></th>
+      <th class="r">Demand Totes<br><span style="font-weight:400;font-size:10px;color:#6b7280">scan-based</span></th>
+      <th class="r">Gallons<br><span style="font-weight:400;font-size:10px;color:#6b7280">× 275 gal/tote</span></th>
+    </tr></thead>
+    <tbody>${annOilRows}</tbody>
+    <tfoot><tr>
+      <td style="padding:7px 10px">TOTAL</td>
+      <td class="r" style="font-weight:700;color:#6d28d9">${annTotProdTotes}T</td>
+      <td class="r"></td>
+      <td class="r" style="font-weight:700;color:#0f766e">${annTotGallons.toLocaleString()} gal</td>
+    </tr></tfoot>
+  </table>
+  <div class="alert" style="margin-top:12px;margin-bottom:0">
+    <strong>Oil ordering guide:</strong> ${annTotProdTotes} total totes × 275 gal = ${annTotGallons.toLocaleString()} gallons across all 5 oil types for the year.
+  </div>
+</div>
+${saveBox}
+<div style="margin:0 12px 8px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">
+  <div style="display:flex;gap:8px">
+    <button class="btn-sm" onclick="set({step:'flags'})">← Back to Checks</button>
+    <button class="btn-sm" onclick="resetPlanner()">↺ New Week</button>
+  </div>
+  <div style="display:flex;gap:8px">
+    <button class="btn" onclick="exportExcel()" style="background:#166534">⬇ Export Excel</button>
+    <button class="btn" onclick="exportPDF()" style="background:#1565C0">⬇ Export PDF</button>
+  </div>
+</div>`;}
+
+// ── HISTORY ──
+function renderHistory(){
+  const log=loadLog();
+  if(!log.length)return`<div class="card"><div class="empty-history">📂 No sessions saved yet.</div></div>`;
+  const entries=log.map((s,i)=>{
+    const isOpen=S.openHistoryId===i;
+    const wohChips=SKUS.map(sku=>{const w=s.woh?.[sku.id];if(w==null)return'';return`<span class="history-woh-chip" style="background:${wksBg(w)};border-color:${wksColor(w)}40;color:${wksColor(w)}">${sku.short} ${w.toFixed(1)}w</span>`;}).join('');
+    const runRows=(s.runs||[]).map((r,ri)=>`<div class="history-run-row"><strong style="color:#1565C0">${ri===0?'Run 1':ri===1?'Run 2':'Run 3'}:</strong><span>Wk ${r.cal} (${r.moLabel})</span>${pill(`${r.totalShipPals}p`,'#1565C0')}${pill(`${r.totalProdTotes}T`,'#6d28d9')}${pill(`${r.trucksShip}×${PALS_PER_TRUCK}p truck${r.trucksShip!==1?'s':''}`,'#0f766e')}</div>`).join('');
+    const noteHtml=s.note?`<div style="margin-top:10px;padding:10px;background:#f9fafb;border-radius:6px;font-size:12px;border-left:3px solid #93c5fd"><strong>Notes:</strong> ${s.note}</div>`:'';
+    const duHtml=s.demandUpdates?.length?`<div style="font-size:12px;color:#1e40af;margin-top:6px">📊 Demand updated: ${s.demandUpdates.join(', ')}</div>`:'';
+    return`<div class="history-entry">
+      <div class="history-entry-header" onclick="toggleHistory(${i})">
+        <div><span style="font-size:13px;font-weight:700;color:#1565C0">${fmtDate(s.ts)}</span><span style="font-size:11px;color:#6b7280;margin-left:10px">${s.fileName||'(demo)'}</span>${s.isDemo?'<span class="demo-badge">DEMO</span>':''}${s.hasEmergency?pill('⚠ Emergency','#dc2626'):''}</div>
+        <span style="color:#9ca3af">${isOpen?'▲':'▼'}</span>
+      </div>
+      <div class="history-entry-body ${isOpen?'open':''}">
+        <p style="font-size:12px;font-weight:700;margin-bottom:6px">Inventory snapshot</p>
+        <div class="history-woh">${wohChips}</div>
+        <p style="font-size:12px;font-weight:700;margin:12px 0 4px">Proposed runs</p>
+        ${runRows||'<span style="font-size:12px;color:#9ca3af">None</span>'}
+        ${duHtml}${noteHtml}
+        <div style="margin-top:10px"><button class="btn-red" onclick="deleteSession(${i})">Delete</button></div>
+      </div>
+    </div>`;}).join('');
+  return`<div class="card" style="padding:12px 18px"><div style="display:flex;justify-content:space-between;align-items:center">
+    <span style="font-size:13px;font-weight:700;color:#1565C0">${log.length} sessions on record</span>
+    <button class="btn-sm" onclick="if(confirm('Clear all history?')){localStorage.removeItem('${STORAGE_KEY}');render();}">Clear all</button>
+  </div></div>${entries}`;}
+
+// ════════════════════════════════════════════
+// ACTIONS
+// ════════════════════════════════════════════
+function toggleHistory(i){set({openHistoryId:S.openHistoryId===i?null:i});}
+function deleteSession(i){const log=loadLog();log.splice(i,1);saveLog(log);render();}
+function setDemandRes(skuId,dir,val){
+  const res={...S.demandFlagResolutions};res[skuId+'_'+dir]=val;
+  if(val==='real_shift'){
+    const flag=S.demandFlags.find(f=>f.skuId===skuId&&f.dir===dir);
+    if(flag){const d=[...getSkuDemand(skuId)];const mos=new Set(flag.weeks.map(w=>week_to_mo[w.weekNum]||0));mos.forEach(mo=>{d[mo]=Math.round(d[mo]*(1+flag.avgPct));});saveSkuDemand(skuId,d);}
+  }
+  // oos_store and oos: hold baseline, mark as monitoring — no demand change
+  // promo/noise: same — no baseline change
+  set({demandFlagResolutions:res});
+}
+function resolveDuplicate(poNum,versionIdx){
+  // User picked which version to keep — update parsedPOs and re-reconcile
+  const dup=S.duplicatePOs.find(d=>d.poNum===poNum);
+  if(!dup)return;
+  const chosen=dup.versions[versionIdx];
+  // Replace in parsedPOs
+  const newParsed=S.parsedPOs.filter(p=>p.poNum!==poNum);
+  newParsed.push(chosen);
+  // Remove from duplicates list
+  const newDups=S.duplicatePOs.filter(d=>d.poNum!==poNum);
+  const reconciled=reconcilePOs(newParsed);
+  const confirmed=reconciled.filter(p=>p.changeType!=='closed');
+  set({parsedPOs:newParsed,reconciledPOs:reconciled,confirmedPOs:confirmed,duplicatePOs:newDups});
+}
+function togglePOConfirm(i,checked){
+  const po=S.reconciledPOs[i];
+  let confirmed=[...S.confirmedPOs];
+  if(checked){if(!confirmed.find(c=>c.poNum===po.poNum))confirmed.push(po);}
+  else{confirmed=confirmed.filter(c=>c.poNum!==po.poNum);}
+  set({confirmedPOs:confirmed});
+}
+function togglePORemove(i,checked){}// handled on save
+
+function resetPlanner(){set({step:'upload',fileName:'',poFileNames:[],parseErr:'',poParseErr:'',liveQoh:{},liveWoh:{},liveAvg:{},liveQoo:{},histBaseline:null,histBaseline:null,scanHistory:null,histBaseline:null,isDemo:false,parsedPOs:[],reconciledPOs:[],confirmedPOs:[],poFileLoaded:false,poFileBuffers:[],duplicatePOs:[],demandFlags:[],demandFlagResolutions:{},proposedRuns:[],emergencyFlags:[],showEmail:false,sessionNote:'',sessionSaved:false});}
+
+function saveSession(){
+  const note=document.getElementById('sessionNoteInput')?.value||'';
+  const demandUpdates=S.demandFlags.filter(f=>S.demandFlagResolutions[f.skuId+'_'+f.dir]==='real_shift').map(f=>`${f.skuShort} ${f.avgPct>=0?'+':''}${Math.round(f.avgPct*100)}%`);
+  // Save confirmed POs to register
+  savePORegister(S.confirmedPOs);
+  appendSession({ts:Date.now(),fileName:S.fileName,isDemo:S.isDemo,hasEmergency:S.emergencyFlags.length>0,woh:{...S.liveWoh},qoh:{...S.liveQoh},runs:S.proposedRuns.map(r=>({aw:r.aw,cal:r.cal,mo:r.mo,moLabel:r.moLabel,totalShipPals:r.totalShipPals,totalProdTotes:r.totalProdTotes,trucksShip:r.trucksShip})),demandUpdates,note});
+  set({sessionNote:note,sessionSaved:true});
+}
+
+// ── DROP ZONE HELPERS ──
+function dzOver(e,id){e.preventDefault();document.getElementById(id).classList.add('dragover');}
+function dzLeave(id){document.getElementById(id).classList.remove('dragover');}
+function dzDrop(e,id){e.preventDefault();dzLeave(id);const f=e.dataTransfer.files[0];if(f)handleFileByZone(f,id);}
+function dzDropMulti(e,id){e.preventDefault();dzLeave(id);const files=Array.from(e.dataTransfer.files);files.forEach(f=>handleFileByZone(f,id));}
+
+function handleFileByZone(file, zoneId){
+  if(zoneId==='dzVendor')handleVendorFile(file);
+  else handlePOFile(file);
+}
+
+function handleVendorFile(file){
+  set({fileName:file.name,parseErr:''});
+  const reader=new FileReader();
+  reader.onload=evt=>{
+    try{
+      const wb=XLSX.read(evt.target.result,{type:'array'});
+      const ws=wb.Sheets['Inventory_Levels'];
+      if(!ws){set({parseErr:"'Inventory_Levels' sheet not found."});return;}
+      const rows=XLSX.utils.sheet_to_json(ws,{header:1});const hdrs=rows[0]||[];
+      // Real vendor file: Description col may be col 3, headers have tildes/newlines
+      const di=hdrs.findIndex(h=>String(h||'').replace(/\s/g,'').toUpperCase()==='DESCRIPTION')||3;
+      // QOH: "Combined Totals for All DCs ~~~~~\nQOH" — match QOH + Combined
+      const qi=hdrs.findIndex(h=>{const s=String(h||'').toUpperCase();return s.includes('QOH')&&s.includes('COMBINED')&&!s.includes('QOO')&&!s.includes('WOH');});
+      // QOO: quantity on order
+      const qooi=hdrs.findIndex(h=>{const s=String(h||'').toUpperCase();return s.includes('QOO')&&s.includes('COMBINED');});
+      // AVG: weekly average
+      const ai=hdrs.findIndex(h=>{const s=String(h||'').toUpperCase();return s.includes('AVG')&&s.includes('COMBINED');});
+      // WOH without QOO
+      const wi=hdrs.findIndex(h=>{const s=String(h||'').toUpperCase();return(s.includes('WOH W/OUT')||s.includes('WOH WITHOUT'))&&s.includes('COMBINED');});
+      if(qi<0){set({parseErr:'Could not find QOH column — check Inventory_Levels tab has Combined Totals columns.'});return;}
+      const qoh={},avg={},woh={},qoo={};
+      for(let i=1;i<rows.length;i++){const row=rows[i];if(!row)continue;const desc=row[di]!=null?String(row[di]):'';const id=matchSku(desc);if(id&&row[qi]!=null&&qoh[id]===undefined){qoh[id]=Number(row[qi])||0;avg[id]=Number(row[ai])||0;woh[id]=Number(row[wi])||0;qoo[id]=qooi>=0?(Number(row[qooi])||0):0;}}
+      if(Object.keys(qoh).length<4){set({parseErr:`Only matched ${Object.keys(qoh).length}/7 SKUs — check descriptions. Found: ${Object.keys(qoh).join(', ')}`});return;}
+
+      // ── Parse long-term baseline from "Unit Sales- History" tab ──
+      // Confirmed column indices from real file:
+      // idx 12-23 = Jan-Dec 2024, idx 25-36 = Jan-Dec 2025, idx 38-42 = Jan-May 2026
+      // idx 24 = Total 2024, idx 37 = Total 2025 (skip these)
+      // Region col = idx 11 — multiple rows per SKU, sum all regions
+      const HIST_2024=Array.from({length:12},(_,i)=>i+12);
+      const HIST_2025=Array.from({length:12},(_,i)=>i+25);
+      const HIST_2026=Array.from({length:5},(_,i)=>i+38);
+      let histBaseline=null;
+      const wsHist=wb.Sheets['Unit Sales- History'];
+      if(wsHist){
+        const rowsH=XLSX.utils.sheet_to_json(wsHist,{header:1,defval:0});
+        const hH=(rowsH[0]||[]);
+        const diH=hH.findIndex(h=>h&&String(h).toUpperCase().includes('DESCRIPTION'));
+        const diHfinal=diH>=0?diH:3;
+        const m24={},m25={},m26={};
+        for(const s of SKUS){m24[s.id]=new Array(12).fill(0);m25[s.id]=new Array(12).fill(0);m26[s.id]=new Array(5).fill(0);}
+        for(let i=1;i<rowsH.length;i++){
+          const row=rowsH[i];if(!row)continue;
+          const desc=row[diHfinal]!=null?String(row[diHfinal]):'';
+          const sid=matchSku(desc);if(!sid)continue;
+          HIST_2024.forEach((ci,mi)=>{const v=Number(row[ci]||0);if(v>0)m24[sid][mi]+=v;});
+          HIST_2025.forEach((ci,mi)=>{const v=Number(row[ci]||0);if(v>0)m25[sid][mi]+=v;});
+          HIST_2026.forEach((ci,mi)=>{const v=Number(row[ci]||0);if(v>0)m26[sid][mi]+=v;});
+        }
+        // Baseline blending logic:
+        // - Launch SKUs (2024 < 50% of 2025): use 2025 only — 2024 was partial year
+        // - EV5oz structural decline: use 2025 only — 2024 overstates demand
+        // - True 2-year SKUs: blend 2024+2025 for stability
+        histBaseline={};
+        for(const s of SKUS){
+          const ann24=m24[s.id].reduce((a,b)=>a+b,0);
+          const ann25=m25[s.id].reduce((a,b)=>a+b,0);
+          const use2025only=s.id==='ev5'||(ann24>0&&ann24<ann25*0.5)||ann24===0;
+          histBaseline[s.id]={};
+          for(let mo=0;mo<12;mo++){
+            const v24=m24[s.id][mo],v25=m25[s.id][mo];
+            let moUnits;
+            if(use2025only){moUnits=v25>0?v25:v24;}
+            else{moUnits=(v25>0&&v24>0)?(v25+v24)/2:v25>0?v25:v24;}
+            histBaseline[s.id][mo]=moUnits>0?moUnits/WKS_PER_MO[mo]:0;
+          }
+          histBaseline[s.id].ytd2026=m26[s.id].slice(0,5);
+          histBaseline[s.id].ytd2025same=m25[s.id].slice(0,5);
+          histBaseline[s.id].use2025only=use2025only;
+          histBaseline[s.id].ann2024=ann24;
+          histBaseline[s.id].ann2025=ann25;
+        }
+        if(Object.values(histBaseline).every(b=>Object.keys(b).every(k=>!b[k])))histBaseline=null;
+      }
+
+            // Parse scan history from "Unit Sales- Last 13Wks" sheet
+      // Structure (confirmed from real file):
+      // Col D (idx 3)  = Description
+      // Col L (idx 11) = 13 Weeks Ago  (units — oldest)
+      // Col N (idx 13) = 12 Weeks Ago  (units)  — NOTE: col M is blank/missing
+      // Col P (idx 15) = 11 Weeks Ago  (units)
+      // Col R (idx 17) = 10 Weeks Ago  (units)
+      // Col T (idx 19) = 9 Weeks Ago   (units)
+      // Col V (idx 21) = 8 Weeks Ago   (units)
+      // Col X (idx 23) = 7 Weeks Ago   (units)
+      // Col Z (idx 25) = 6 Weeks Ago   (units)
+      // Col AB (idx 27) = 5 Weeks Ago  (units)
+      // Col AD (idx 29) = 4 Weeks Ago  (units)
+      // Col AF (idx 31) = 3 Weeks Ago  (units)
+      // Col AH (idx 33) = 2 Weeks Ago  (units)
+      // Col AJ (idx 35) = Last Week     (units)
+      // Interleaved odd columns (M,O,Q,...AI,AK) are % change — must be EXCLUDED
+      // Col AL (idx 37) = 13-Week Total, Col AM (idx 38) = 12-Week Average — also excluded
+      // File date Jun 15 2026 = calendar Wk 25. "Last Week" = Wk 25, "13 Weeks Ago" = Wk 13.
+      const UNIT_COLS=[
+        {ci:11,weeksAgo:13},{ci:13,weeksAgo:12},{ci:15,weeksAgo:11},{ci:17,weeksAgo:10},
+        {ci:19,weeksAgo:9}, {ci:21,weeksAgo:8}, {ci:23,weeksAgo:7}, {ci:25,weeksAgo:6},
+        {ci:27,weeksAgo:5}, {ci:29,weeksAgo:4}, {ci:31,weeksAgo:3}, {ci:33,weeksAgo:2},
+        {ci:35,weeksAgo:0},
+      ];
+      let scanHistory=null;
+      const ws13=wb.Sheets['Unit Sales- Last 13Wks'];
+      if(ws13){
+        const rows13=XLSX.utils.sheet_to_json(ws13,{header:1,defval:null});
+        // Verify column structure against header row
+        const h13=(rows13[0]||[]);
+        const fileWk=25; // Jun 15 2026 = Wk 25
+        const wkColsMapped=UNIT_COLS.map(c=>({ci:c.ci,weekNum:fileWk-c.weeksAgo}));
+        const di13_raw=h13.findIndex(h=>h&&String(h).toUpperCase().includes('DESCRIPTION'));
+        const di13=di13_raw>=0?di13_raw:3;
+
+        scanHistory={};for(const s of SKUS)scanHistory[s.id]=[];
+        for(let i=1;i<rows13.length;i++){
+          const row=rows13[i];
+          if(!row)continue;
+          const desc=row[di13]!=null?String(row[di13]):'';
+          const id=matchSku(desc);
+          if(!id||scanHistory[id].length>0)continue;
+          for(const wc of wkColsMapped){
+            const v=row[wc.ci];
+            // Only accept non-negative integers (unit sales, not % change decimals)
+            const num=Number(v);
+            if(v!=null&&!isNaN(num)&&Number.isInteger(num)&&num>=0){
+              scanHistory[id].push({weekNum:wc.weekNum,units:num});
+            }
+          }
+        }
+        if(Object.values(scanHistory).every(a=>a.length===0))scanHistory=null;
+      }
+      set({liveQoh:qoh,liveAvg:avg,liveWoh:woh,liveQoo:qoo,scanHistory,histBaseline,isDemo:false,sessionSaved:false});
+    }catch(err){set({parseErr:'Parse error: '+err.message});}
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+function handlePOFile(file){
+  set({poParseErr:''});
+  const reader=new FileReader();
+  reader.onload=evt=>{
+    try{
+      const wb=XLSX.read(evt.target.result,{type:'array'});
+      const ws=wb.Sheets[wb.SheetNames[0]];
+      if(!ws){set({poParseErr:'Could not read: '+file.name});return;}
+      const rows=XLSX.utils.sheet_to_json(ws,{header:1});
+      const parsed=parsePOFile(rows,[]);
+      if(parsed.length===0){set({poParseErr:'No PO rows found in: '+file.name});return;}
+
+      // Accumulate POs from multiple files
+      const existing=[...S.poFileBuffers];
+      const newNames=[...S.poFileNames];
+      if(!newNames.includes(file.name))newNames.push(file.name);
+
+      // Add parsed POs, tagging with source file
+      const tagged=parsed.map(p=>({...p,sourceFile:file.name}));
+      existing.push(...tagged);
+
+      // Detect duplicates — same PO number across different source files
+      const poGroups={};
+      for(const p of existing){
+        if(!poGroups[p.poNum])poGroups[p.poNum]=[];
+        poGroups[p.poNum].push(p);
+      }
+      const duplicates=Object.entries(poGroups)
+        .filter(([,arr])=>arr.length>1&&new Set(arr.map(a=>a.sourceFile)).size>1)
+        .map(([poNum,arr])=>({poNum,versions:arr}));
+
+      // Merge: for non-duplicates, take as-is; for duplicates keep both until resolved
+      const merged=[];
+      const seenPOs=new Set();
+      for(const p of existing){
+        const isDup=duplicates.find(d=>d.poNum===p.poNum);
+        if(!isDup&&!seenPOs.has(p.poNum)){
+          merged.push(p);
+          seenPOs.add(p.poNum);
+        }
+      }
+      // Add first version of duplicates (user will resolve)
+      for(const d of duplicates){
+        if(!seenPOs.has(d.poNum)){merged.push(d.versions[0]);seenPOs.add(d.poNum);}
+      }
+
+      const reconciled=reconcilePOs(merged);
+      const confirmed=reconciled.filter(p=>p.changeType!=='closed');
+      set({poFileBuffers:existing,poFileNames:newNames,parsedPOs:merged,
+           reconciledPOs:reconciled,confirmedPOs:confirmed,
+           duplicatePOs:duplicates,poFileLoaded:true,poParseErr:''});
+    }catch(err){set({poParseErr:'Parse error in '+file.name+': '+err.message});}
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+// ════════════════════════════════════════════
+// BIND
+// ════════════════════════════════════════════
+function bind(){
+  // Drop zone click-to-upload
+  ['dzVendor','dzPO'].forEach(id=>{
+    const dz=document.getElementById(id);
+    const inp=document.getElementById(id+'_input');
+    if(dz&&inp){
+      dz.addEventListener('click',()=>inp.click());
+      inp.addEventListener('change',e=>{Array.from(e.target.files).forEach(f=>handleFileByZone(f,id));});
+    }
+  });
+
+  const pu=document.getElementById('proceedUpload');
+  if(pu)pu.addEventListener('click',()=>{
+    // Load stored POs if no file dropped
+    if(!S.poFileLoaded){
+      const stored=loadPORegister();
+      const reconciled=stored.map(p=>({...p,changeType:'unchanged',prev:p}));
+      set({reconciledPOs:reconciled,confirmedPOs:[...stored],step:'pos'});
+    } else {
+      set({step:'pos'});
+    }
+  });
+
+  const db=document.getElementById('demoBtn');
+  if(db)db.addEventListener('click',()=>{
+    const demandFlags=analyzeTrends(DEMO_HISTORY);
+    set({liveQoh:DEMO_QOH,liveWoh:DEMO_WOH,liveAvg:DEMO_AVG,scanHistory:DEMO_HISTORY,histBaseline:null,fileName:'demo-vendor.xlsx',poFileNames:['demo-pos.xlsx'],isDemo:true,parsedPOs:DEMO_POS_RECONCILED,reconciledPOs:DEMO_POS_RECONCILED,confirmedPOs:DEMO_POS_RECONCILED.filter(p=>p.changeType!=='closed'),poFileLoaded:true,demandFlags,demandFlagResolutions:{},sessionSaved:false,step:'pos'});
+  });
+
+  const pp=document.getElementById('proceedPOs');
+  if(pp)pp.addEventListener('click',()=>{
+    const shortFlags=S.scanHistory?analyzeTrends(S.scanHistory,S.histBaseline):[];
+    const driftFlags=checkLongTermDrift(S.histBaseline);
+    const allFlags=[...shortFlags];
+    for(const df of driftFlags){if(!allFlags.find(f=>f.skuId===df.skuId&&f.dir===df.dir))allFlags.push(df);}
+    set({demandFlags:allFlags,demandFlagResolutions:{},step:'flags'});
+  });
+
+  const pf=document.getElementById('proceedFlags');
+  if(pf)pf.addEventListener('click',()=>{
+    const runs=projectRuns(S.liveQoh,CURRENT_AW,S.confirmedPOs);
+    set({proposedRuns:runs,emergencyFlags:checkEmergency(S.liveWoh,runs),step:'results',sessionSaved:false});
+  });
+
+  const te=document.getElementById('toggleEmail');
+  if(te)te.addEventListener('click',()=>set({showEmail:!S.showEmail}));
+
+  const ce=document.getElementById('copyEmail');
+  if(ce)ce.addEventListener('click',()=>{const txt=document.getElementById('emailText');if(txt)navigator.clipboard.writeText(txt.textContent).then(()=>{set({emailCopied:true});setTimeout(()=>set({emailCopied:false}),2000);});});
+
+  const ss=document.getElementById('saveSessionBtn');
+  if(ss)ss.addEventListener('click',saveSession);
+}
+
+
+// ════════════════════════════════════════════
+// EXPORT — Excel + PDF
+// ════════════════════════════════════════════
+function fmtN(n,dec=0){return n==null||isNaN(n)?'—':Number(n).toLocaleString('en-US',{minimumFractionDigits:dec,maximumFractionDigits:dec});}
+function fmtPct(n){return n==null||isNaN(n)?'—':(n>=0?'+':'')+Math.round(n*100)+'%';}
+function todayStr(){return new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});}
+
+// ── DEMAND NARRATIVE per SKU ──
+function skuNarrative(sku){
+  const sid=sku.id;
+  const hist=S.histBaseline?S.histBaseline[sid]:null;
+  const scans=(S.scanHistory||{})[sid]||[];
+  const last4=scans.slice(-4);
+  const r4avg=last4.length?last4.reduce((a,b)=>a+b.units,0)/last4.length:0;
+  const blNow=wklyDemand(sku,CURRENT_AW);
+  const scanPct=blNow>0?(r4avg-blNow)/blNow:0;
+
+  // YoY from histBaseline ytd fields
+  const ytd26=hist?.ytd2026?.reduce((a,b)=>a+b,0)||0;
+  const ytd25=hist?.ytd2025same?.reduce((a,b)=>a+b,0)||0;
+  const ytdPct=ytd25>0?(ytd26-ytd25)/ytd25:0;
+
+  // Trend direction
+  const trend=last4.length>=3?(
+    last4[last4.length-1].units<last4[0].units*0.80?'declining sharply':
+    last4[last4.length-1].units<last4[0].units*0.95?'declining modestly':
+    last4[last4.length-1].units>last4[0].units*1.20?'rising sharply':
+    last4[last4.length-1].units>last4[0].units*1.05?'rising modestly':'stable'):'—';
+
+  // OOS flag
+  const oosFlag=S.demandFlagResolutions?.[sid+'_down']==='oos_store'||
+    (sid==='av5'&&trend==='declining sharply');
+
+  const annBaseline=getSkuDemand(sid).reduce((t,d)=>t+d,0);
+  const up=UNITS_PAL[sku.fill],ut=UNITS_TOTE[sku.fill];
+
+  return{
+    ytd26,ytd25,ytdPct,r4avg,blNow,scanPct,trend,oosFlag,annBaseline,
+    annPals:Math.ceil(annBaseline/up),annTotes:Math.ceil(annBaseline/ut),
+    last4Units:last4.map(w=>w.units)
+  };
+}
+
+// ── EXCEL EXPORT ──
+function exportExcel(){
+  if(!S.proposedRuns||!S.proposedRuns.length){alert('Run the plan first, then export.');return;}
+  const wb=XLSX.utils.book_new();
+  const today=todayStr();
+
+  // Style helpers
+  const hdr=(v)=>({v,t:'s'});
+  const num=(v)=>({v:Number(v)||0,t:'n'});
+  const pct=(v)=>({v:Number(v)||0,t:'n',z:'0.0%'});
+  const str=(v)=>({v:String(v||''),t:'s'});
+
+  // ── TAB 1: Summary ──
+  const sum=[
+    [str('SABBEL FOODS LLC — WFM SPRAY OIL WEEKLY PLAN')],
+    [str('Sabre Private Label Group — Internal Planning Document')],
+    [str('Report Date:'),str(today)],
+    [str('Vendor File:'),str(S.fileName||'—')],
+    [str('PO File(s):'),str((S.poFileNames||[]).join(', ')||'—')],
+    [],
+    [str('PROGRAM STATUS')],
+    [str('SKU'),str('QOH'),str('Avg Wkly'),str('Weeks on Hand'),str('Status')],
+  ];
+  for(const sku of SKUS){
+    const w=S.liveWoh[sku.id]||0,q=S.liveQoh[sku.id]||0,a=S.liveAvg[sku.id]||0;
+    const st=w<=0?'OOS':w<2?'CRITICAL':w<3?'LOW':w<=11?'OK':'HIGH';
+    sum.push([str(sku.name),num(q),num(Math.round(a)),num(Math.round(w*10)/10),str(st)]);
+  }
+  sum.push([],[str('OPEN POs')],[str('PO Number'),str('Week'),str('Total Units'),str('Total Pallets'),str('Status')]);
+  for(const po of (S.confirmedPOs||[])){
+    sum.push([str(po.poNum),str(po.weekNum?'Wk '+po.weekNum:'—'),num(po.totalUnits||0),num(po.pals||0),str(po.status||'OPEN')]);
+  }
+  if(!(S.confirmedPOs||[]).length)sum.push([str('No open POs on record')]);
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(sum),'Summary');
+
+  // ── TAB 2: Production Plan ──
+  const prod=[[str('PRODUCTION PLAN — NEXT 3 RUNS')]];
+  for(const [ri,r] of S.proposedRuns.entries()){
+    prod.push([]);
+    prod.push([str(`Run ${ri+1}  —  Wk ${r.cal} (${r.moLabel})  |  ${r.totalShipPals}p shipped  |  ${r.totalProdTotes}T produced  |  ${r.trucksShip} trucks`)]);
+    prod.push([str('SKU'),str('SF Carry-In'),str('Produced (units)'),str('Totes'),str('Shipped to UNFI'),str('SF Carry-Out'),str('UNFI Wks Before'),str('UNFI Wks After')]);
+    for(const sku of SKUS){
+      const d=r.detail[sku.id];if(!d)continue;
+      prod.push([str(sku.name),num(d.carryIn),num(d.produced),num(d.prodTotes),num(d.shipped),num(d.carryOut),
+        num(Math.round(d.unfiBeforeWks*10)/10),num(Math.round(d.unfiAfterWks*10)/10)]);
+    }
+    prod.push([str('TOTAL'),str(''),str(''),num(r.totalProdTotes),str(''),str(''),str(''),str('')]);
+    prod.push([str('Oil Totes Needed:')]);
+    const OT=[{id:'avocado',label:'Avocado Oil',skus:['av5','av10']},{id:'evoo',label:'EVOO',skus:['ev5','ev10']},
+      {id:'cooking',label:'Cooking Oil',skus:['cook']},{id:'canola',label:'Canola Oil',skus:['canal']},{id:'baking',label:'Baking Oil',skus:['bake']}];
+    for(const ot of OT){
+      const t=ot.skus.reduce((s,id)=>s+(r.detail[id]?.prodTotes||0),0);
+      if(t>0)prod.push([str(''),str(ot.label),num(t),str('totes'),num(t*275),str('gal')]);
+    }
+  }
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(prod),'Production Plan');
+
+  // ── TAB 3: 3-Month Inventory Check ──
+  const inv3=[[str('3-MONTH INVENTORY CHECK — Cans per SKU and Oil Totes per Run')]];
+  inv3.push([str('Run'),str('Week'),str('Month'),...SKUS.map(s=>str(s.short)),str('Av Totes'),str('EVOO Totes'),str('Cook Totes'),str('Canal Totes'),str('Bake Totes'),str('Total Totes')]);
+  const OT2=[{skus:['av5','av10']},{skus:['ev5','ev10']},{skus:['cook']},{skus:['canal']},{skus:['bake']}];
+  const totRows={};for(const s of SKUS)totRows[s.id]=0;
+  const totOilRows=[0,0,0,0,0];
+  for(const [ri,r] of S.proposedRuns.entries()){
+    const oilT=OT2.map(ot=>ot.skus.reduce((s,id)=>s+(r.detail[id]?.produced||0)/UNITS_TOTE[SKUS.find(x=>x.id===id).fill],0));
+    const row=[str(`Run ${ri+1}`),str('Wk '+r.cal),str(r.moLabel),
+      ...SKUS.map(s=>{const v=r.detail[s.id]?.produced||0;totRows[s.id]+=v;return num(v);}),
+      ...oilT.map((t,i)=>{totOilRows[i]+=t;return num(Math.round(t*10)/10);}),
+      num(oilT.reduce((a,b)=>a+b,0))];
+    inv3.push(row);
+  }
+  inv3.push([str('TOTAL'),str(''),str(''),...SKUS.map(s=>num(totRows[s.id])),...totOilRows.map(t=>num(Math.round(t*10)/10)),num(totOilRows.reduce((a,b)=>a+b,0))]);
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(inv3),'3-Month Check');
+
+  // ── TAB 4: Demand Analysis ──
+  const dem=[[str('DEMAND ANALYSIS — SKU BASELINES AND TRENDS')]];
+  dem.push([str('SKU'),str('2025 Annual'),str('2026 YTD'),str('YTD vs 2025'),str('4-Wk Avg Scans'),str('Jun Baseline/Wk'),str('Scan vs Baseline'),str('Trend'),str('OOS?'),str('Working Baseline/yr'),str('Status/Notes')]);
+  for(const sku of SKUS){
+    const n=skuNarrative(sku);
+    const note=n.oosFlag?'OOS confirmed — baseline held':
+      Math.abs(n.ytdPct)>=0.15?(n.ytdPct<0?'Structural decline — monitor':'Growing — confirm before baseline increase'):
+      Math.abs(n.scanPct)>=0.20?(n.scanPct<0?'Scan decline — investigate':'Scan elevation — confirm'):'Tracking to plan';
+    dem.push([str(sku.name),num(n.annBaseline),num(n.ytd26),pct(n.ytdPct),
+      num(Math.round(n.r4avg)),num(Math.round(n.blNow)),pct(n.scanPct),
+      str(n.trend),str(n.oosFlag?'YES':''),num(n.annBaseline),str(note)]);
+  }
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(dem),'Demand Analysis');
+
+  // ── TAB 5: 12-Month Forecast ──
+  const fc=[[str('12-MONTH FORECAST')]];
+  fc.push([str('SKU'),str('Planned Production (units)'),str('Planned Production (pallets)'),str('Projected Scans (units)'),str('Surplus / Deficit'),str('Oil Totes Needed'),str('Gallons')]);
+  let totPU=0,totPP=0,totSU=0,totT=0;
+  for(const sku of SKUS){
+    const n=skuNarrative(sku);
+    const scanU=sku.demand.reduce((a,b)=>a+b,0);
+    const diff=n.annBaseline-scanU;
+    totPU+=n.annBaseline;totPP+=n.annPals;totSU+=scanU;totT+=n.annTotes;
+    fc.push([str(sku.name),num(n.annBaseline),num(n.annPals),num(scanU),num(diff),num(n.annTotes),num(n.annTotes*275)]);
+  }
+  fc.push([str('TOTAL'),num(totPU),num(totPP),num(totSU),num(totPU-totSU),num(totT),num(totT*275)]);
+  fc.push([]);
+  fc.push([str('OIL TOTES BY TYPE')]);
+  fc.push([str('Oil Type'),str('SKUs'),str('Annual Totes'),str('Gallons')]);
+  const OT3=[{label:'Avocado Oil',skus:['av5','av10']},{label:'EVOO',skus:['ev5','ev10']},
+    {label:'Cooking Oil',skus:['cook']},{label:'Canola Oil',skus:['canal']},{label:'Baking Oil',skus:['bake']}];
+  for(const ot of OT3){
+    const t=ot.skus.reduce((s,id)=>s+Math.ceil(getSkuDemand(id).reduce((a,b)=>a+b,0)/UNITS_TOTE[SKUS.find(x=>x.id===id).fill]),0);
+    fc.push([str(ot.label),str(ot.skus.map(id=>SKUS.find(s=>s.id===id).short).join('+')),num(t),num(t*275)]);
+  }
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(fc),'12-Month Forecast');
+
+  // ── Download ──
+  const dt=new Date().toISOString().slice(0,10);
+  XLSX.writeFile(wb,`Sabbel_WFM_Weekly_Plan_${dt}.xlsx`);
+}
+
+// ── PDF EXPORT ──
+function exportPDF(){
+  if(!S.proposedRuns||!S.proposedRuns.length){alert('Run the plan first, then export.');return;}
+  const today=todayStr();
+  const OT=[{id:'avocado',label:'Avocado Oil',skus:['av5','av10'],color:'#166534'},
+    {id:'evoo',label:'EVOO',skus:['ev5','ev10'],color:'#0f766e'},
+    {id:'cooking',label:'Cooking Oil',skus:['cook'],color:'#92400e'},
+    {id:'canola',label:'Canola Oil',skus:['canal'],color:'#1565C0'},
+    {id:'baking',label:'Baking Oil',skus:['bake'],color:'#6d28d9'}];
+
+  // Status color
+  const sc=(w)=>w<=0?'#dc2626':w<3?'#ea580c':w<=11?'#16a34a':'#d97706';
+  const sl=(w)=>w<=0?'OOS':w<3?`${w.toFixed(1)}w ⚠`:w<=11?`${w.toFixed(1)}w ✓`:`${w.toFixed(1)}w ↑`;
+
+  // Run table rows
+  const runTables=S.proposedRuns.map((r,ri)=>{
+    const rows=SKUS.map(sku=>{
+      const d=r.detail[sku.id];if(!d)return'';
+      return`<tr>
+        <td>${sku.name}</td>
+        <td style="text-align:right">${d.carryIn>0?fmtN(d.carryIn):'—'}</td>
+        <td style="text-align:right">${d.produced>0?fmtN(d.produced):'—'}</td>
+        <td style="text-align:right;font-weight:700">${d.prodTotes>0?d.prodTotes+'T':'—'}</td>
+        <td style="text-align:right">${d.shipped>0?fmtN(d.shipped):'—'}</td>
+        <td style="text-align:right">${d.carryOut>0?fmtN(d.carryOut):'—'}</td>
+        <td style="text-align:right;color:${sc(d.unfiBeforeWks)}">${sl(d.unfiBeforeWks)}</td>
+        <td style="text-align:right;color:${sc(d.unfiAfterWks)};font-weight:700">${sl(d.unfiAfterWks)}</td>
+      </tr>`;}).join('');
+    const oilRows=OT.map(ot=>{
+      const t=ot.skus.reduce((s,id)=>s+(r.detail[id]?.prodTotes||0),0);
+      return t>0?`<span style="margin-right:16px;color:${ot.color}"><strong>${ot.label}:</strong> ${t}T (${fmtN(t*275)} gal)</span>`:''}).join('');
+    return`<div style="margin-bottom:20px">
+      <h3 style="font-size:13px;color:#1565C0;margin-bottom:6px">
+        ${ri===0?'★ ':''}Run ${ri+1} — Wk ${r.cal} (${r.moLabel}) &nbsp;|&nbsp;
+        ${r.totalShipPals}p shipped &nbsp;|&nbsp; ${r.totalProdTotes}T produced &nbsp;|&nbsp; ${r.trucksShip} truck${r.trucksShip!==1?'s':''} × ${PALS_PER_TRUCK}p
+        ${!r.moqOk&&r.totalShipPals<MOQ_FLEX_LOW?' &nbsp;<span style="color:#dc2626">⚠ Below 60p MOQ</span>':''}
+      </h3>
+      <table><thead><tr><th>SKU</th><th>SF Carry-In</th><th>Produced</th><th>Totes</th><th>Shipped→UNFI</th><th>SF Carry-Out</th><th>UNFI Before</th><th>UNFI After</th></tr></thead>
+      <tbody>${rows}</tbody></table>
+      <div style="margin-top:6px;font-size:11px">${oilRows}</div>
+    </div>`;
+  }).join('');
+
+  // Demand narrative rows
+  const demRows=SKUS.map(sku=>{
+    const n=skuNarrative(sku);
+    const ytdColor=n.ytdPct<=-0.15?'#dc2626':n.ytdPct>=0.15?'#166534':'#374151';
+    const scanColor=n.scanPct<=-0.20?'#dc2626':n.scanPct>=0.20?'#166534':'#374151';
+    const oosNote=n.oosFlag?'<br><span style="color:#dc2626;font-size:10px">🔴 Store OOS confirmed — baseline held</span>':'';
+    const note=Math.abs(n.ytdPct)>=0.15?(n.ytdPct<0?'Structural decline':'Growing — monitor'):
+               Math.abs(n.scanPct)>=0.20?(n.scanPct<0?'Scan decline — investigate':'Scan elevated — confirm'):'On plan';
+    return`<tr>
+      <td>${sku.name}${oosNote}</td>
+      <td style="text-align:right">${fmtN(n.annBaseline)}</td>
+      <td style="text-align:right;color:${ytdColor}">${fmtPct(n.ytdPct)}</td>
+      <td style="text-align:right">${fmtN(Math.round(n.r4avg))}</td>
+      <td style="text-align:right;color:${scanColor}">${fmtPct(n.scanPct)}</td>
+      <td style="text-align:right;font-style:italic;font-size:10px">${n.trend}</td>
+      <td style="text-align:right;font-weight:700">${fmtN(n.annBaseline)}</td>
+      <td style="font-size:10px">${note}</td>
+    </tr>`;
+  }).join('');
+
+  // 12-month forecast rows
+  const fcRows=SKUS.map(sku=>{
+    const n=skuNarrative(sku);
+    const scanU=sku.demand.reduce((a,b)=>a+b,0);
+    const diff=n.annBaseline-scanU;
+    return`<tr>
+      <td>${sku.name}</td>
+      <td style="text-align:right;font-weight:700">${fmtN(n.annBaseline)}</td>
+      <td style="text-align:right">${fmtN(n.annPals)}</td>
+      <td style="text-align:right">${fmtN(scanU)}</td>
+      <td style="text-align:right;color:${diff<0?'#dc2626':'#166534'}">${diff>=0?'+':''}${fmtN(diff)}</td>
+      <td style="text-align:right;color:#6d28d9;font-weight:700">${n.annTotes}T</td>
+      <td style="text-align:right">${fmtN(n.annTotes*275)}</td>
+    </tr>`;
+  }).join('');
+
+  const totAnnUnits=SKUS.reduce((t,s)=>t+skuNarrative(s).annBaseline,0);
+  const totAnnPals=SKUS.reduce((t,s)=>t+skuNarrative(s).annPals,0);
+  const totAnnTotes=SKUS.reduce((t,s)=>t+skuNarrative(s).annTotes,0);
+  const totScanUnits=SKUS.reduce((t,s)=>t+s.demand.reduce((a,b)=>a+b,0),0);
+
+  const oilFcRows=OT.map(ot=>{
+    const totes=ot.skus.reduce((s,id)=>s+Math.ceil(getSkuDemand(id).reduce((a,b)=>a+b,0)/UNITS_TOTE[SKUS.find(x=>x.id===id).fill]),0);
+    const skuStr=ot.skus.map(id=>SKUS.find(s=>s.id===id).short).join(' + ');
+    return`<tr><td style="color:${ot.color};font-weight:700">${ot.label}</td><td style="font-size:10px;color:#6b7280">${skuStr}</td>
+      <td style="text-align:right;font-weight:700;color:${ot.color}">${totes}T</td>
+      <td style="text-align:right">${fmtN(totes*275)} gal</td></tr>`;
+  }).join('');
+
+  // PO rows
+  const poRows=(S.confirmedPOs||[]).length
+    ? (S.confirmedPOs||[]).map(po=>`<tr><td><strong>${po.poNum}</strong></td><td>${po.weekNum?'Wk '+po.weekNum:'—'}</td><td style="text-align:right">${fmtN(po.totalUnits||0)}</td><td style="text-align:right">${po.pals||0}p</td><td>${po.status||'OPEN'}</td></tr>`).join('')
+    : '<tr><td colspan="5" style="color:#9ca3af;font-style:italic">No open POs on record</td></tr>';
+
+  const html=`<!DOCTYPE html><html><head><meta charset="UTF-8">
+<title>Sabbel WFM Weekly Plan — ${today}</title>
+<style>
+  @page{size:letter;margin:0.7in 0.6in;}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:Arial,sans-serif;font-size:11px;color:#1a1a1a;line-height:1.4;}
+  .cover{text-align:center;padding:40px 0 30px;}
+  .cover h1{font-size:18px;color:#1565C0;margin-bottom:6px;}
+  .cover h2{font-size:13px;color:#374151;font-weight:400;margin-bottom:4px;}
+  .cover .meta{font-size:10px;color:#6b7280;margin-top:8px;}
+  h2.section{font-size:13px;font-weight:700;color:#1565C0;border-bottom:2px solid #dbeafe;padding-bottom:4px;margin:16px 0 8px;}
+  h3{font-size:12px;font-weight:700;color:#374151;margin:10px 0 5px;}
+  table{width:100%;border-collapse:collapse;font-size:10px;margin-bottom:8px;}
+  th{background:#dbeafe;color:#1565C0;font-weight:700;padding:5px 7px;text-align:left;border-bottom:2px solid #93c5fd;}
+  td{padding:4px 7px;border-bottom:1px solid #f3f4f6;}
+  tr:nth-child(even) td{background:#f9fafb;}
+  .status-box{display:inline-block;padding:2px 8px;border-radius:10px;font-size:9px;font-weight:700;}
+  .flag-box{background:#fef3c7;border:1px solid #f59e0b;border-radius:4px;padding:6px 10px;margin-bottom:6px;font-size:10px;color:#92400e;}
+  .good-box{background:#f0fdf4;border:1px solid #86efac;border-radius:4px;padding:8px 12px;margin-bottom:8px;font-size:11px;color:#166534;}
+  .page-break{page-break-before:always;}
+  .inv-grid{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;}
+  .inv-tile{border-radius:6px;padding:8px 10px;min-width:90px;border:1px solid;text-align:center;}
+  .inv-tile .short{font-size:9px;color:#6b7280;margin-bottom:2px;}
+  .inv-tile .woh{font-size:14px;font-weight:700;}
+  .inv-tile .units{font-size:9px;color:#9ca3af;}
+  tfoot td{background:#dbeafe !important;font-weight:700;}
+</style></head><body>
+
+<div class="cover">
+  <h1>Sabbel Foods LLC — WFM Spray Oil Weekly Plan</h1>
+  <h2>Sabre Private Label Group — Internal Planning Document</h2>
+  <div class="meta">
+    Report Date: ${today} &nbsp;|&nbsp;
+    Vendor File: ${S.fileName||'—'} &nbsp;|&nbsp;
+    PO File: ${(S.poFileNames||[]).join(', ')||'—'}
+  </div>
+</div>
+
+<h2 class="section">1. Current UNFI Inventory</h2>
+<div class="inv-grid">
+${SKUS.map(sku=>{const w=S.liveWoh[sku.id]||0,q=S.liveQoh[sku.id]||0;
+  const bg=w<=0?'#fee2e2':w<3?'#fff7ed':w<=11?'#f0fdf4':'#fffbeb';
+  const bc=sc(w)+'40';
+  return`<div class="inv-tile" style="background:${bg};border-color:${bc}">
+    <div class="short">${sku.short}</div>
+    <div class="woh" style="color:${sc(w)}">${sl(w)}</div>
+    <div class="units">${fmtN(q)} units</div>
+  </div>`;}).join('')}
+</div>
+
+<h2 class="section">2. Open PO Register</h2>
+<table><thead><tr><th>PO Number</th><th>Ship Week</th><th>Units</th><th>Pallets</th><th>Status</th></tr></thead>
+<tbody>${poRows}</tbody></table>
+
+<h2 class="section">3. Production Plan — Next 3 Runs</h2>
+${runTables}
+
+<div class="page-break"></div>
+
+<h2 class="section">4. Demand Analysis</h2>
+<p style="font-size:10px;color:#6b7280;margin-bottom:8px">
+  2025 Annual = confirmed prior-year baseline &nbsp;|&nbsp; YTD = 2026 Jan–May vs same period 2025 &nbsp;|&nbsp;
+  4-Wk Avg = recent scan average &nbsp;|&nbsp; Scan vs BL = deviation from baseline
+</p>
+<table>
+  <thead><tr><th>SKU</th><th style="text-align:right">2025 Annual</th><th style="text-align:right">YTD vs '25</th>
+    <th style="text-align:right">4-Wk Avg</th><th style="text-align:right">Scan vs BL</th>
+    <th>Trend</th><th style="text-align:right">Working Baseline</th><th>Assessment</th></tr></thead>
+  <tbody>${demRows}</tbody>
+</table>
+
+<h2 class="section">5. 12-Month Forecast</h2>
+<table>
+  <thead><tr><th>SKU</th><th style="text-align:right">Planned Prod (units)</th><th style="text-align:right">Prod (pals)</th>
+    <th style="text-align:right">Proj Scans (units)</th><th style="text-align:right">Surplus</th>
+    <th style="text-align:right">Oil Totes</th><th style="text-align:right">Gallons</th></tr></thead>
+  <tbody>${fcRows}</tbody>
+  <tfoot><tr><td>TOTAL</td><td style="text-align:right">${fmtN(totAnnUnits)}</td><td style="text-align:right">${fmtN(totAnnPals)}</td>
+    <td style="text-align:right">${fmtN(totScanUnits)}</td><td style="text-align:right">${fmtN(totAnnUnits-totScanUnits)}</td>
+    <td style="text-align:right;color:#6d28d9;font-weight:700">${totAnnTotes}T</td>
+    <td style="text-align:right">${fmtN(totAnnTotes*275)} gal</td></tr></tfoot>
+</table>
+
+<h3 style="margin-top:12px">Oil Totes by Type — for Signature Filling</h3>
+<table style="max-width:400px">
+  <thead><tr><th>Oil Type</th><th>SKUs</th><th style="text-align:right">Annual Totes</th><th style="text-align:right">Gallons</th></tr></thead>
+  <tbody>${oilFcRows}</tbody>
+  <tfoot><tr><td>TOTAL</td><td></td><td style="text-align:right">${totAnnTotes}T</td><td style="text-align:right">${fmtN(totAnnTotes*275)} gal</td></tr></tfoot>
+</table>
+
+</body></html>`;
+
+  const w2=window.open('','_blank');
+  w2.document.write(html);
+  w2.document.close();
+  setTimeout(()=>w2.print(),500);
+}
+
+render();
+</script>
+</body>
+</html>
